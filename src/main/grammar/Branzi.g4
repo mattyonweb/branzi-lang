@@ -9,7 +9,9 @@ block
 statement
     : if_statement
     | while_statement
-    | expr ;
+    | declare_statement
+    | update_statement
+    | expr_el ;
 
 if_statement
     : 'if' '(' expr ')' block ;
@@ -17,17 +19,43 @@ if_statement
 while_statement
     : 'while' '(' expr ')' block ;
 
+declare_statement
+    : IDENTIFIER ':' type ':=' expr_el;
+
+update_statement
+    : lvalue '=' expr_el;
+
 /////////////////7
 
+expr_el
+    : expr EL ;
+
 expr
-    : IDENTIFIER '=' expr                             # exprAssign
-    | IDENTIFIER ':' type '=' expr                    # declareNewVar
-    | '('   Exp = expr   ')'                          # Parens
+    : '('   Exp = expr   ')'                          # Parens
     | Left = expr Op = (TIMES | DIV)  Right = expr    # MulDiv
     | Left = expr Op = (PLUS  | MINUS) Right = expr   # AddSub
+    | array_explicit                                  # ExprArrayExplicit
+    | array_access                                    # ExprArrayAccess
+    | boolean_expr                                    # ExprBool
     | IDENTIFIER                                      # ExprVar
     | NUMBER                                          # ExprNum
     ;
+
+lvalue
+    : array_access  # lvalueArrayAccess
+    | IDENTIFIER    # lvalueSimpleVar
+    ;
+
+//////////////////////
+
+array_access
+    : IDENTIFIER '[' expr ']' ;
+
+array_explicit
+    : '[' ']' # emptyArray
+    | '[' fst = expr (',' elements+=expr)* ']'  # nonEmptyArray
+    ;
+///////////////////////
 
 TIMES : '*';
 DIV : '/';
@@ -37,7 +65,22 @@ MINUS : '-';
 
 T_INT : 'int';
 T_BOOL : 'bool';
-type : (T_INT|T_BOOL) ;
+T_LIST : 'list';
+type : (T_INT|T_BOOL|T_LIST) ;
+
+//////////////////////
+B_AND : 'and' ;
+B_OR  : 'or'  ;
+B_NOT : 'not' ;
+
+boolean_expr
+    : 'true'
+    | 'false'
+    | '(' boolean_expr ')'
+    | B_NOT boolean_expr
+    | boolean_expr (B_AND|B_OR) boolean_expr
+    ;
+///////////////////////////
 
 IDENTIFIER : (LETTER (LETTER | DIGIT)*) ;
 
@@ -53,4 +96,6 @@ LETTER : LOWER | UPPER ;
 
 LOWER : ('a'..'z') ;
 UPPER : ('A'..'Z') ;
+
+EL : ';';
 

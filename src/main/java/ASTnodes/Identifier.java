@@ -2,16 +2,14 @@ package ASTnodes;
 
 public class Identifier extends ASTNode {
     private final String id;
-    private final Type type;
-
-    public Identifier(String id, Type type) {
-        this.id = id;
-        this.type = type;
-    }
+    private Type type = null;
 
     public Identifier(String id) {
         this.id = id;
-        this.type = null;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 
     public String getId() {
