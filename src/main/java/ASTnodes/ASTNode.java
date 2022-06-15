@@ -1,5 +1,9 @@
 package ASTnodes;
 
-public class ASTNode {
+import FrontEnd.Environment;
 
+public abstract class ASTNode {
+    public void typecheck(Environment env) {
+
+    }
 }

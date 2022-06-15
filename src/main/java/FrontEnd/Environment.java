@@ -1,3 +1,5 @@
+package FrontEnd;
+
 import ASTnodes.ASTNode;
 
 import java.util.HashMap;

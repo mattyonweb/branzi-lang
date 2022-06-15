@@ -66,7 +66,11 @@ MINUS : '-';
 T_INT : 'int';
 T_BOOL : 'bool';
 T_LIST : 'list';
-type : (T_INT|T_BOOL|T_LIST) ;
+type
+    : '(' type ')'   # parensType
+    | (T_INT|T_BOOL) # simpleType
+    | T_LIST type    # arrayType
+    ;
 
 //////////////////////
 B_AND : 'and' ;

@@ -1,9 +1,12 @@
+package FrontEnd;
+
 import ASTnodes.*;
 import ASTnodes.Number;
 import generated.BranziBaseVisitor;
 import generated.BranziParser;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
@@ -94,7 +97,7 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
         Identifier varId = new Identifier(
                 ctx.IDENTIFIER().getText()
         );
-        varId.setType(this.visitType(ctx.type()));
+        varId.setType((Type) this.visit(ctx.type()));
 
         env.put(varId.getId(), varId);
 
@@ -170,42 +173,22 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
     public ASTNode visitBoolean_expr(BranziParser.Boolean_exprContext ctx) {
         return null; // TODO
     }
-//    @Override
-//    public ASTNode visitExprAssign(BranziParser.ExprAssignContext ctx) {
-//        return new UpdateVar(
-//                env.get(ctx.IDENTIFIER().getText()),
-//                this.visit(ctx.expr())
-//        );
-//    }
-//
-//    @Override
-//    public ASTNode visitDeclareNewVar(BranziParser.DeclareNewVarContext ctx) {
-//        Identifier varId = new Identifier(
-//                ctx.IDENTIFIER().getText(),
-//                this.visitType(ctx.type())
-//        );
-//
-//        env.put(varId.getId(), varId);
-//
-//        return new AssignVar(
-//                varId, this.visit(ctx.expr())
-//        );
-//    }
 
     @Override
-    public Type visitType(BranziParser.TypeContext ctx) {
-        return new Type(ctx.getText()); // ?
+    public ASTNode visitParensType(BranziParser.ParensTypeContext ctx) {
+        return this.visit(ctx.type());
     }
 
-    //    @Override
-//    public ASTNode visitExprAssign(BranziParser.ExprAssignContext ctx) {
-//        String varname = ctx.IDENTIFIER().getText();
-//        ASTNode identifier = new Identifier(varname);
-//        ASTNode node = this.visit(ctx.expr());
-//
-//        env.put(varname, identifier);
-//        return new AssignVar(varname, node);
-//    }
+    @Override
+    public ASTNode visitSimpleType(BranziParser.SimpleTypeContext ctx) {
+        return new Type(ctx.getText());
+    }
 
-
+    @Override
+    public ASTNode visitArrayType(BranziParser.ArrayTypeContext ctx) {
+        return new Type(
+                ctx.T_LIST().getText(),
+                List.of((Type) this.visit(ctx.type()))
+        );
+    }
 }
