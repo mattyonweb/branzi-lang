@@ -16,4 +16,22 @@ public class If extends ASTNode {
                 ", code=" + code +
                 '}';
     }
+
+    @Override
+    public Type typeof() {
+        return Type.VOID;
+    }
+
+    @Override
+    public void typecheck() throws TypeCheckerFail {
+        this.condition.typecheck();
+        this.code.typecheck();
+
+        TypeCheckerFail.verify(
+                "Condition of IF is not of boolean type",
+                this.condition,
+                this.condition.typeof(),
+                Type.BOOL
+        );
+    }
 }

@@ -16,4 +16,15 @@ public class Sequence extends ASTNode {
                 "n2=" + n2 +
                 '}';
     }
+
+    @Override
+    public Type typeof() {
+        return Type.VOID;
+    }
+
+    @Override
+    public void typecheck() throws TypeCheckerFail {
+        this.n1.typecheck();
+        this.n2.typecheck();
+    }
 }

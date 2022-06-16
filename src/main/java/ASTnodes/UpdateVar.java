@@ -16,4 +16,21 @@ public class UpdateVar extends ASTNode {
                 ", value=" + value +
                 '}';
     }
+
+    @Override
+    public Type typeof() {
+        return Type.VOID;
+    }
+
+    @Override
+    public void typecheck() throws TypeCheckerFail {
+        this.value.typecheck();
+
+        TypeCheckerFail.verify(
+                "New value for assignee is of wrong type",
+                this,
+                this.varId.typeof(),
+                this.value.typeof()
+        );
+    }
 }

@@ -66,23 +66,28 @@ MINUS : '-';
 T_INT : 'int';
 T_BOOL : 'bool';
 T_LIST : 'list';
+T_ANY  : 'any';
+
 type
     : '(' type ')'   # parensType
-    | (T_INT|T_BOOL) # simpleType
+    | (T_INT|T_BOOL|T_ANY) # simpleType
     | T_LIST type    # arrayType
     ;
 
 //////////////////////
+B_TRUE : 'true';
+B_FALSE : 'false';
 B_AND : 'and' ;
 B_OR  : 'or'  ;
 B_NOT : 'not' ;
+B_XOR : 'xor' ;
 
 boolean_expr
-    : 'true'
-    | 'false'
-    | '(' boolean_expr ')'
-    | B_NOT boolean_expr
-    | boolean_expr (B_AND|B_OR) boolean_expr
+    : B_TRUE  # boolTrue
+    | B_FALSE # boolFalse
+    | '(' boolean_expr ')' # boolParens
+    | B_NOT boolean_expr   # boolNot
+    | Left = boolean_expr Op = (B_AND|B_OR|B_XOR) Right = boolean_expr # boolBinop
     ;
 ///////////////////////////
 

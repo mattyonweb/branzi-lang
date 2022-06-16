@@ -170,8 +170,33 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
     }
 
     @Override
-    public ASTNode visitBoolean_expr(BranziParser.Boolean_exprContext ctx) {
-        return null; // TODO
+    public ASTNode visitBoolTrue(BranziParser.BoolTrueContext ctx) {
+        return new Bool(true);
+    }
+
+    @Override
+    public ASTNode visitBoolFalse(BranziParser.BoolFalseContext ctx) {
+        return new Bool(false);
+    }
+
+    @Override
+    public ASTNode visitBoolNot(BranziParser.BoolNotContext ctx) {
+        // TODO (crea classe UnaryOp)
+        return null;
+    }
+
+    @Override
+    public ASTNode visitBoolBinop(BranziParser.BoolBinopContext ctx) {
+        return new BinOp(
+                this.visit(ctx.Left),
+                ctx.Op.getText(),
+                this.visit(ctx.Right)
+        );
+    }
+
+    @Override
+    public ASTNode visitBoolParens(BranziParser.BoolParensContext ctx) {
+        return this.visit(ctx.boolean_expr());
     }
 
     @Override

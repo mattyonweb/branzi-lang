@@ -13,4 +13,14 @@ public class Number extends ASTNode {
                 "n=" + n +
                 '}';
     }
+
+    @Override
+    public Type typeof() {
+        return Type.INT;
+    }
+
+    @Override
+    public void typecheck() throws TypeCheckerFail {
+        // Nothing
+    }
 }

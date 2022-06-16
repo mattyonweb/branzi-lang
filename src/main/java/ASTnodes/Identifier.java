@@ -17,6 +17,11 @@ public class Identifier extends ASTNode {
     }
 
     @Override
+    public Type typeof() {
+        return this.type;
+    }
+
+    @Override
     public String toString() {
         Integer hash = this.hashCode();
         String hashS = hash.toString();
@@ -26,5 +31,10 @@ public class Identifier extends ASTNode {
                 "id='" + id + lastHash + '\'' +
                 ", type='" + type + '\'' +
                 '}';
+    }
+
+    @Override
+    public void typecheck() throws TypeCheckerFail {
+        // niente da fare qui
     }
 }
