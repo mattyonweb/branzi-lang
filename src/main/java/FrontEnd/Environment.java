@@ -28,4 +28,11 @@ public class Environment {
     public Environment outer() {
         return this.top;
     }
+
+    @Override
+    public String toString() {
+        return "Environment{" +
+                "dict=" + dict +
+                '}';
+    }
 }

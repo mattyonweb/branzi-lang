@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class MyArray extends ASTNode {
     private ArrayList<ASTNode> list;
-    private Type assignedType = null; // POV.  l : list bool := []; come fa [] a sapere che è di tipo bool?
+    private Type assignedType = new Type("list", Type.TBD); // POV.  l : list bool := []; come fa [] a sapere che è di tipo bool?
 
     public MyArray(ArrayList<ASTNode> list) {
         this.list = list;

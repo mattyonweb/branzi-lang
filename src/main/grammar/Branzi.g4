@@ -1,7 +1,12 @@
 grammar Branzi;
 
 program
-    : block EOF ;
+    : unit* EOF ;
+
+unit
+    : function_declaration # funcDecl
+    | block # blockDeclaration
+    ;
 
 block
     : '{' statement* '}';
@@ -55,7 +60,20 @@ array_explicit
     : '[' ']' # emptyArray
     | '[' fst = expr (',' elements+=expr)* ']'  # nonEmptyArray
     ;
+
 ///////////////////////
+
+function_declaration
+    : 'function' Name = IDENTIFIER ':' type  '('  ')'  block # funcDeclEmptyArgs
+    | 'function' Name = IDENTIFIER ':' type
+                  '(' arg1 = IDENTIFIER (',' otherArgs+=IDENTIFIER)* ')'
+                  block # funcDeclNonEmptyArgs
+    ;
+
+
+///////////////////////
+
+
 
 TIMES : '*';
 DIV : '/';
@@ -69,9 +87,18 @@ T_LIST : 'list';
 T_ANY  : 'any';
 
 type
-    : '(' type ')'   # parensType
-    | (T_INT|T_BOOL|T_ANY) # simpleType
-    | T_LIST type    # arrayType
+    : simple_type
+    | func_type
+    ;
+
+simple_type
+    : '(' simple_type ')'   # parensType
+    | basetype=(T_INT|T_BOOL|T_ANY)  # baseType
+    | T_LIST simple_type    # arrayType
+    ;
+
+func_type:
+    | '('? arg1 = simple_type ('->' otherArgs+=simple_type )+ ')'?
     ;
 
 //////////////////////
@@ -88,6 +115,7 @@ boolean_expr
     | '(' boolean_expr ')' # boolParens
     | B_NOT boolean_expr   # boolNot
     | Left = boolean_expr Op = (B_AND|B_OR|B_XOR) Right = boolean_expr # boolBinop
+    // | IDENTIFIER # boolIdentifier
     ;
 ///////////////////////////
 

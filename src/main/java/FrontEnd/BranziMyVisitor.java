@@ -10,20 +10,102 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
-    Environment env = null;
+    Environment env = new Environment(null);
 
     @Override
     public ASTNode visitProgram(BranziParser.ProgramContext ctx) {
-        return this.visit(ctx.block());
+        return new Program(
+                ctx.unit().stream().map(this::visit).collect(Collectors.toList())
+        );
     }
 
     @Override
+    public ASTNode visitFuncDeclEmptyArgs(BranziParser.FuncDeclEmptyArgsContext ctx) {
+        String funcname = ctx.Name.getText();
+        Identifier funcId = new Identifier(funcname);
+
+        Type funcType = (Type) this.visit(ctx.type());
+        System.out.println(funcType);
+        funcId.setType(funcType);
+
+        List<Identifier> funcArgs = new ArrayList<>();
+
+        // Aggiungerò all'ENV il nome di questa stessa funzione, per permettere
+        // chiamate ricosrive
+        List<Identifier> addToEnv = new ArrayList<>();
+        addToEnv.add(funcId);
+
+        return new Function(
+                funcId,
+                funcType,
+                funcArgs,
+                this.visitBlockAddingToEnvironment(ctx.block(), addToEnv)
+        );
+    }
+
+    @Override
+    public ASTNode visitFuncDeclNonEmptyArgs(BranziParser.FuncDeclNonEmptyArgsContext ctx) {
+        String funcname = ctx.Name.getText();
+        Identifier funcId = new Identifier(funcname);
+
+        Type funcType = (Type) this.visit(ctx.type());
+        funcId.setType(funcType);
+
+        List<Identifier> funcArgs = new ArrayList<>();
+        funcArgs.add(new Identifier(ctx.arg1.getText()));
+        funcArgs.addAll(ctx.otherArgs
+                .stream()
+                .map(a -> new Identifier(a.getText()))
+                .collect(Collectors.toList())
+        );
+
+        List<Identifier> addToEnv = new ArrayList<>(funcArgs);
+        // Aggiungerò all'ENV il nome di questa stessa funzione, per permettere
+        // chiamate ricosrive
+        addToEnv.add(funcId);
+
+        return new Function(
+                funcId,
+                funcType,
+                funcArgs,
+                this.visitBlockAddingToEnvironment(ctx.block(), addToEnv)
+        );
+    }
+
+
+
+    @Override
+    public ASTNode visitFunc_type(BranziParser.Func_typeContext ctx) {
+        List<Type> types = new ArrayList<>();
+        types.add((Type) this.visit(ctx.arg1));
+        types.addAll(ctx.otherArgs.stream()
+                .map(t -> (Type) (this.visit(t)))
+                .collect(Collectors.toList()));
+
+        return Type.Function(types);
+    }
+
+
+    @Override
     public ASTNode visitBlock(BranziParser.BlockContext ctx) {
+        return this.visitBlockAddingToEnvironment(
+                ctx,
+                new ArrayList<>()
+        );
+    }
+
+    public ASTNode visitBlockAddingToEnvironment(BranziParser.BlockContext ctx,
+                                                 List<Identifier> idsToAdd) {
         if (ctx.statement().size() == 0) {
-            return null; // TODO: return VOID!
+            return Type.VOID; // TODO: non è proprio giustissimo ecco
         }
 
         env = new Environment(env);
+        for (Identifier id: idsToAdd) {
+            env.put(id.getId(), id);
+        }
+
+        System.out.println(env);
 
         if (ctx.statement().size() == 1) {
             ASTNode result = this.visit(ctx.statement(0));
@@ -42,6 +124,8 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
         env = env.outer();
         return sequence;
     }
+
+
 
     @Override
     public ASTNode visitIf_statement(BranziParser.If_statementContext ctx) {
@@ -65,6 +149,7 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitAddSub(BranziParser.AddSubContext ctx) {
+        System.out.println(this.visit(ctx.Left));
         return new BinOp(
                 this.visit(ctx.Left),
                 ctx.Op.getText(),
@@ -86,6 +171,7 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
     public ASTNode visitExprVar(BranziParser.ExprVarContext ctx) {
         return env.get(ctx.IDENTIFIER().getText());
     }
+
 
     @Override
     public ASTNode visitExprNum(BranziParser.ExprNumContext ctx) {
@@ -116,25 +202,26 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
     }
 
 
-    @Override
-    public ASTNode visitExprArrayAccess(BranziParser.ExprArrayAccessContext ctx) {
-        return this.visit(ctx.array_access());
-    }
 
-    @Override
-    public ASTNode visitExprArrayExplicit(BranziParser.ExprArrayExplicitContext ctx) {
-        return this.visit(ctx.array_explicit());
-    }
-
-    @Override
-    public ASTNode visitExprBool(BranziParser.ExprBoolContext ctx) {
-        return this.visit(ctx.boolean_expr());
-    }
-
-    @Override
-    public ASTNode visitLvalueArrayAccess(BranziParser.LvalueArrayAccessContext ctx) {
-        return this.visit(ctx.array_access());
-    }
+//    @Override
+//    public ASTNode visitExprArrayAccess(BranziParser.ExprArrayAccessContext ctx) {
+//        return this.visit(ctx.array_access());
+//    }
+//
+//    @Override
+//    public ASTNode visitExprArrayExplicit(BranziParser.ExprArrayExplicitContext ctx) {
+//        return this.visit(ctx.array_explicit());
+//    }
+//
+//    @Override
+//    public ASTNode visitExprBool(BranziParser.ExprBoolContext ctx) {
+//        return this.visit(ctx.boolean_expr());
+//    }
+//
+//    @Override
+//    public ASTNode visitLvalueArrayAccess(BranziParser.LvalueArrayAccessContext ctx) {
+//        return this.visit(ctx.array_access());
+//    }
 
     @Override
     public ASTNode visitLvalueSimpleVar(BranziParser.LvalueSimpleVarContext ctx) {
@@ -194,6 +281,7 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
         );
     }
 
+    // TODO
     @Override
     public ASTNode visitBoolParens(BranziParser.BoolParensContext ctx) {
         return this.visit(ctx.boolean_expr());
@@ -201,19 +289,26 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitParensType(BranziParser.ParensTypeContext ctx) {
-        return this.visit(ctx.type());
+        return this.visit(ctx.simple_type());
     }
 
     @Override
-    public ASTNode visitSimpleType(BranziParser.SimpleTypeContext ctx) {
-        return new Type(ctx.getText());
+    public ASTNode visitBaseType(BranziParser.BaseTypeContext ctx) {
+        switch(ctx.basetype.getText()) {
+            case "int": return Type.INT;
+            case "any": return Type.ANY;
+            case "bool": return Type.BOOL;
+            default: return null;
+        }
     }
 
     @Override
     public ASTNode visitArrayType(BranziParser.ArrayTypeContext ctx) {
         return new Type(
                 ctx.T_LIST().getText(),
-                List.of((Type) this.visit(ctx.type()))
+                List.of((Type) this.visit(ctx.simple_type()))
         );
     }
+
+
 }

@@ -1,6 +1,7 @@
 package FrontEnd;
 
 import ASTnodes.ASTNode;
+import ASTnodes.Type;
 import ASTnodes.TypeCheckerFail;
 import generated.BranziLexer;
 import generated.BranziParser;
@@ -17,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 
 public class FrontEnd {
     public static void main(String[] ss) throws IOException, TypeCheckerFail {
+
         FrontEnd frontEnd = new FrontEnd();
         ASTNode visit = frontEnd.ast_of("static/test1.branzi");
 //        ASTNode visit = frontEnd.ast_of(ss[1]);

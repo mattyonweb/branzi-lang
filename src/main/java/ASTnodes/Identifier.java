@@ -2,7 +2,7 @@ package ASTnodes;
 
 public class Identifier extends ASTNode {
     private final String id;
-    private Type type = null;
+    private Type type = Type.TBD;
 
     public Identifier(String id) {
         this.id = id;

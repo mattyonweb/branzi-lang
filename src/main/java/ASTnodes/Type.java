@@ -9,6 +9,7 @@ public class Type extends ASTNode {
     public static Type VOID = new Type("void");
     public static Type ANY = new Type("any");
     public static Type TYPE = new Type("type");
+    public static Type TBD = new Type("tbd");
 
     /////////////////////////////////
 
@@ -17,7 +18,7 @@ public class Type extends ASTNode {
 
     public Type(String type) {
         this.type = type;
-        this.parameters = null;
+        this.parameters = Arrays.asList();
     }
 
     public Type(String type, List<Type> parameters) {
@@ -42,6 +43,9 @@ public class Type extends ASTNode {
         // Nothing to do (?)
     }
 
+    public boolean isCompund() {
+        return this.parameters.size() > 0;
+    }
     //////////////////////////////////
 
     public static boolean subtype(Type t1, Type t2) {
@@ -50,6 +54,10 @@ public class Type extends ASTNode {
         // t <= Any, for all t
         if (t2.type.equals("any")) { // NON cambiare con t2.equals(Type.ANY). Non va, e fallisce silenziosamente
             return true;
+        }
+
+        if (t1.equals(Type.TBD) || t2.equals(Type.TBD)) {
+            return false;
         }
 
         // Follows: type equality
@@ -81,6 +89,11 @@ public class Type extends ASTNode {
         return new Type("function", params);
     }
 
+    public static Type Function(List<Type> params) {
+        // Helper method
+        return new Type("function", params);
+    }
+
     /////////////////////////////7
 
     public List<Type> getParameters() {
@@ -103,7 +116,7 @@ public class Type extends ASTNode {
     public String toString() {
         String s = type;
 
-        if (parameters == null)
+        if (parameters == null || parameters.size() == 0)
             return s;
 
         return s + parameters;
