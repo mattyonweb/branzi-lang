@@ -3,3 +3,8 @@ function nomefunc : (int -> bool -> void) (n, l) {
     return;
 }
 
+function noargs : int () { return 666; }
+
+function main : int -> int (x) {
+    return noargs();
+}

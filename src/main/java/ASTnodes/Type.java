@@ -46,6 +46,7 @@ public class Type extends ASTNode {
     public boolean isCompund() {
         return this.parameters.size() > 0;
     }
+    public boolean isFunction() { return this.type.equals("function"); }
     //////////////////////////////////
 
     public static boolean subtype(Type t1, Type t2) {
@@ -84,6 +85,8 @@ public class Type extends ASTNode {
         return true;
     }
 
+    ///////////////////////////////////
+
     public static Type Function(Type ... params) {
         // Helper method
         return new Type("function", params);
@@ -92,6 +95,10 @@ public class Type extends ASTNode {
     public static Type Function(List<Type> params) {
         // Helper method
         return new Type("function", params);
+    }
+
+    public static Type List(Type param) {
+        return new Type("list", param);
     }
 
     /////////////////////////////7

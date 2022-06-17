@@ -1,11 +1,15 @@
 package ASTnodes;
 
-public class TypeCheckerFail extends Exception {
+public class TypeCheckerFail extends RuntimeException {
     public TypeCheckerFail() {
     }
 
     public TypeCheckerFail(String message) {
         super(message);
+    }
+
+    public TypeCheckerFail(String message, ASTNode culprit) {
+        super(message + "\n\tin: " + culprit);
     }
 
     public TypeCheckerFail(String comment, ASTNode culprit, Type expected, Type obtained) {

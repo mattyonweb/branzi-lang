@@ -36,7 +36,8 @@ expr_el
     : expr EL ;
 
 expr
-    : '('   Exp = expr   ')'                          # Parens
+    : funcall                                         # ExprFuncall
+    | '('   Exp = expr   ')'                          # Parens
     | Left = expr Op = (TIMES | DIV)  Right = expr    # MulDiv
     | Left = expr Op = (PLUS  | MINUS) Right = expr   # AddSub
     | array_explicit                                  # ExprArrayExplicit
@@ -51,6 +52,10 @@ lvalue
     | IDENTIFIER    # lvalueSimpleVar
     ;
 
+funcall
+    : IDENTIFIER '(' ')'  # FuncallNoArgs
+    | IDENTIFIER '(' arg1 = expr (',' otherArgs+=expr)* ')' # FuncallWithArgs
+    ;
 //////////////////////
 
 array_access
@@ -64,10 +69,10 @@ array_explicit
 ///////////////////////
 
 function_declaration
-    : 'function' Name = IDENTIFIER ':' type  '('  ')'
+    : 'function' Name = IDENTIFIER ':' func_type  '('  ')'
             '{' function_body+=statement*
                 return_stmt  '}'              # funcDeclEmptyArgs
-    | 'function' Name = IDENTIFIER ':' type
+    | 'function' Name = IDENTIFIER ':' func_type
              '(' arg1 = IDENTIFIER (',' otherArgs+=IDENTIFIER)* ')'
              '{' function_body+=statement*
                  return_stmt  '}'             # funcDeclNonEmptyArgs
@@ -106,7 +111,7 @@ simple_type
     ;
 
 func_type:
-    | '('? arg1 = simple_type ('->' otherArgs+=simple_type )+ ')'?
+    | '('? arg1 = simple_type ('->' otherArgs+=simple_type )* ')'?
     ;
 
 //////////////////////

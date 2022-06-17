@@ -4,14 +4,20 @@ import ASTnodes.*;
 import ASTnodes.Number;
 import generated.BranziBaseVisitor;
 import generated.BranziParser;
+import org.antlr.v4.runtime.Token;
 import org.javatuples.Pair;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import static java.lang.Math.max;
 
 public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
     Environment env = new Environment(null);
+    Map<Identifier, Function> functions = new HashMap<>();
 
     @Override
     public ASTNode visitProgram(BranziParser.ProgramContext ctx) {
@@ -25,7 +31,7 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
         String funcname = ctx.Name.getText();
         Identifier funcId = new Identifier(funcname);
 
-        Type funcType = (Type) this.visit(ctx.type());
+        Type funcType = (Type) this.visit(ctx.func_type());
         System.out.println(funcType);
         funcId.setType(funcType);
 
@@ -33,14 +39,8 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
 
         // Aggiungerò all'ENV il nome di questa stessa funzione, per permettere
         // chiamate ricosrive
-        List<Identifier> addToEnv = new ArrayList<>();
-        addToEnv.add(funcId);
-
-        // eval dentro nuova scope
         env = new Environment(env);
-        for (Identifier id: addToEnv) {
-            env.put(id.getId(), id);
-        }
+        env.putAtOutermost(funcname, funcId);
 
         // Ottieni AST del body della funzione
         ASTNode funcBody = buildSequence(ctx.function_body);
@@ -50,13 +50,18 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
 
         env = env.outer();
 
-        return new Function(
+        Function foo = new Function(
                 funcId,
                 funcType,
                 funcArgs,
                 funcBody,
                 funcReturn
         );
+
+        // Functions IDS are saved in env
+        // Functions are saved in the map ID -> FUNCTION
+        functions.put(funcId, foo);
+        return foo;
     }
 
     @Override
@@ -64,30 +69,37 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
         String funcname = ctx.Name.getText();
         Identifier funcId = new Identifier(funcname);
 
-        Type funcType = (Type) this.visit(ctx.type());
+        Type funcType = (Type) this.visit(ctx.func_type());
         funcId.setType(funcType);
 
-        List<Identifier> funcArgs = new ArrayList<>();
-        funcArgs.add(new Identifier(ctx.arg1.getText()));
-        funcArgs.addAll(ctx.otherArgs
+        // Raccolgo i nomi (:: string) degli argomenti
+        List<String> funcArgsNames = new ArrayList<>();
+        funcArgsNames.add(ctx.arg1.getText());
+        funcArgsNames.addAll(ctx.otherArgs
                 .stream()
-                .map(a -> new Identifier(a.getText()))
+                .map(Token::getText)
                 .collect(Collectors.toList())
         );
 
-        List<Identifier> addToEnv = new ArrayList<>(funcArgs);
-        // Aggiungerò all'ENV il nome di questa stessa funzione, per permettere
-        // chiamate ricosrive
-        addToEnv.add(funcId);
+        // Se
+        //     foo : int -> bool -> int (x, b)
+        // ritorna [x:int, b:bool]
+        List<Identifier> funcArgs = createTypedVariables(
+                funcArgsNames, funcType
+        );
 
-        // eval dentro nuova scope
+        // Creo la scope per l'interno della funzione
         env = new Environment(env);
-        for (Identifier id: addToEnv) {
+        for (Identifier id: funcArgs) {
             env.put(id.getId(), id);
         }
 
-        System.out.println(env);
-        System.out.println("\n\n");
+        // Nell'env metto i riferimenti alla funzione che sono in procinto di definire.
+        // Aggiungo anche un `null` alle functions, in modo da intercettare casi del tipo:
+        //     { foo: int := 666; foo(12); }
+        env.putAtOutermost(funcname, funcId);
+        functions.put(funcId, null);
+
         // Ottieni AST del body della funzione
         ASTNode funcBody = buildSequence(ctx.function_body);
 
@@ -96,16 +108,67 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
 
         env = env.outer();
 
-        return new Function(
+        Function foo = new Function(
                 funcId,
                 funcType,
                 funcArgs,
                 funcBody,
                 funcReturn
         );
+
+        functions.put(funcId, foo);
+        return foo;
     }
 
+    private List<Identifier> createTypedVariables(List<String> varNames, Type funcType) {
+        if (!funcType.isFunction()) {
+            throw new TypeCheckerFail("Serious error: function has not-function type: " + funcType);
+        }
 
+        int funcArity = max(0, funcType.getParameters().size()-1);
+        if (funcArity != varNames.size()) {
+            throw new TypeCheckerFail(
+                    "Mismatch between expected num. of arguments (" + funcArity + ") and" +
+                            "given arguments (" + varNames.size() + ")"
+            );
+        }
+
+        List<Identifier> variables = new ArrayList<>();
+        for (int i = 0; i < varNames.size(); i++) {
+            Identifier varId = new Identifier(varNames.get(i));
+            varId.setType(funcType.getParameter(i));
+            variables.add(varId);
+        }
+
+        return variables;
+    }
+
+    @Override
+    public ASTNode visitFuncallNoArgs(BranziParser.FuncallNoArgsContext ctx) {
+        Identifier funcId  = (Identifier) env.get(ctx.IDENTIFIER().getText());
+
+
+        if (!functions.containsKey(funcId))
+            throw new TypeCheckerFail("Tried to call " + funcId.getId() + " but in this scope it is not a function" +
+                    "\nIn: " + ctx.IDENTIFIER().getParent().getText());
+
+        return new Funcall(funcId);
+    }
+
+    @Override
+    public ASTNode visitFuncallWithArgs(BranziParser.FuncallWithArgsContext ctx) {
+        Identifier funcId  = (Identifier) env.get(ctx.IDENTIFIER().getText());
+
+        if (!functions.containsKey(funcId))
+            throw new TypeCheckerFail("Tried to call " + funcId.getId() + " but in this scope it is not a function" +
+                    "\nIn: " + ctx.IDENTIFIER().getParent().getText());
+
+        List<ASTNode> args = new ArrayList<>();
+        args.add(this.visit(ctx.arg1));
+        args.addAll(ctx.otherArgs.stream().map(this::visit).collect(Collectors.toList()));
+
+        return new Funcall(funcId, args);
+    }
 
     @Override
     public ASTNode visitFunc_type(BranziParser.Func_typeContext ctx) {

@@ -19,6 +19,10 @@ public class Function extends ASTNode{
         this.returnNode = returnNode;
     }
 
+    public Identifier getFuncId() {
+        return funcId;
+    }
+
     @Override
     public Type typeof() {
         return (funcType.isCompund() ? funcType.getLastParameter() : funcType);
@@ -43,6 +47,7 @@ public class Function extends ASTNode{
         }
 
         this.body.typecheck();
+        this.returnNode.typecheck();
 
         TypeCheckerFail.verify(
                 "Return statement and function signature have different types",
@@ -58,7 +63,8 @@ public class Function extends ASTNode{
                 "\n\tfuncId=" + funcId +
                 "\n\tfuncType=" + funcType +
                 "\n\tfuncArgs=" + funcArgs +
-                "\nbody=" + body +
+                "\n\tbody=" + body +
+                "\n\treturn=" + returnNode +
                 '}';
     }
 }

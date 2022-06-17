@@ -9,7 +9,7 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-class FrontEndTest {
+class FunctionsTest {
     FrontEnd frontEnd;
 
     void typechecks(String s) throws IOException, TypeCheckerFail {
@@ -171,6 +171,70 @@ class FrontEndTest {
     void testReturnArgument5() throws IOException, TypeCheckerFail {
         typechecks(
                 "function foo : (int -> void -> list any) (x, y) { l: list int := [1,x,2]; return l; }"
+        );
+    }
+
+    @Test
+    void testFuncNameScope() throws IOException, TypeCheckerFail {
+        typechecks(
+                "function foo : void () {return;}" +
+                        "function bar : void () {return foo();}"
+        );
+    }
+
+    @Test
+    void testFuncNameScope2() throws IOException, TypeCheckerFail {
+        typechecks(
+                "function foo : int -> bool -> int (x,b) {return x;}" +
+                        "function bar : int () {return foo(2, true);}"
+        );
+    }
+
+    @Test
+    void testFuncNameScope3() throws IOException, TypeCheckerFail {
+        typecheck_fail(
+                "function foo : int -> bool -> int (x,b) {return x;}" +
+                        "function bar : int () {x: list int := foo(2, true); return 0;}"
+        );
+    }
+
+    @Test
+    void testFuncNameScope4Wrongs() throws IOException, TypeCheckerFail {
+        typecheck_fail(
+                "function foo : int -> bool -> int (x,b) {return x;}" +
+                        "function bar : int () {return foo(2); }"
+        );
+
+        typecheck_fail(
+                "function foo : int -> bool -> int (x,b) {return x;}" +
+                        "function bar : int () {return foo(2, true, 3); }"
+        );
+
+        typecheck_fail(
+                "function foo : int -> bool -> int (x,b) {return x;}" +
+                        "function bar : int () {return foo(); }"
+        );
+    }
+
+    @Test
+    void testFuncNameScopeOverlap() throws IOException, TypeCheckerFail {
+        typecheck_fail(
+                "function foo : int -> bool (x) {return false;}" +
+                        "function bar : int () {foo: int := 666; return foo(3);}"
+        );
+    }
+
+    @Test
+    void testFuncRecursion() throws IOException, TypeCheckerFail {
+        typechecks(
+                "function wrongFact : int -> int (n) {return wrongFact(n-1);}"
+        );
+    }
+
+    @Test
+    void testFuncRecursionWrong() throws IOException, TypeCheckerFail {
+        typecheck_fail(
+                "function reallyWrongFact : int -> int (n) {return reallyWrongFact(n, n-1);}"
         );
     }
 }

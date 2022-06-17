@@ -25,6 +25,14 @@ public class Environment {
         return null;
     }
 
+    public void putAtOutermost(String name, ASTNode node) {
+        if (top != null) {
+            top.putAtOutermost(name, node);
+        } else {
+            this.put(name, node);
+        }
+    }
+
     public Environment outer() {
         return this.top;
     }

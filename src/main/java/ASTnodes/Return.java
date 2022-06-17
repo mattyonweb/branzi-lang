@@ -16,4 +16,11 @@ public class Return extends ASTNode {
     public void typecheck() throws TypeCheckerFail {
         this.expr.typecheck();
     }
+
+    @Override
+    public String toString() {
+        return "Return{" +
+                "expr=" + expr +
+                '}';
+    }
 }
