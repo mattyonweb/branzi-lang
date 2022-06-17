@@ -4,6 +4,7 @@ import ASTnodes.*;
 import ASTnodes.Number;
 import generated.BranziBaseVisitor;
 import generated.BranziParser;
+import org.javatuples.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,11 +36,26 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
         List<Identifier> addToEnv = new ArrayList<>();
         addToEnv.add(funcId);
 
+        // eval dentro nuova scope
+        env = new Environment(env);
+        for (Identifier id: addToEnv) {
+            env.put(id.getId(), id);
+        }
+
+        // Ottieni AST del body della funzione
+        ASTNode funcBody = buildSequence(ctx.function_body);
+
+        // AST del Return
+        ASTNode funcReturn = this.visit(ctx.return_stmt());
+
+        env = env.outer();
+
         return new Function(
                 funcId,
                 funcType,
                 funcArgs,
-                this.visitBlockAddingToEnvironment(ctx.block(), addToEnv)
+                funcBody,
+                funcReturn
         );
     }
 
@@ -64,11 +80,28 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
         // chiamate ricosrive
         addToEnv.add(funcId);
 
+        // eval dentro nuova scope
+        env = new Environment(env);
+        for (Identifier id: addToEnv) {
+            env.put(id.getId(), id);
+        }
+
+        System.out.println(env);
+        System.out.println("\n\n");
+        // Ottieni AST del body della funzione
+        ASTNode funcBody = buildSequence(ctx.function_body);
+
+        // AST del Return
+        ASTNode funcReturn = this.visit(ctx.return_stmt());
+
+        env = env.outer();
+
         return new Function(
                 funcId,
                 funcType,
                 funcArgs,
-                this.visitBlockAddingToEnvironment(ctx.block(), addToEnv)
+                funcBody,
+                funcReturn
         );
     }
 
@@ -88,43 +121,54 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitBlock(BranziParser.BlockContext ctx) {
-        return this.visitBlockAddingToEnvironment(
-                ctx,
-                new ArrayList<>()
-        );
-    }
-
-    public ASTNode visitBlockAddingToEnvironment(BranziParser.BlockContext ctx,
-                                                 List<Identifier> idsToAdd) {
+        // Visita blocco "nudo", ie. NON il blocco di una funcdef
         if (ctx.statement().size() == 0) {
-            return Type.VOID; // TODO: non è proprio giustissimo ecco
+            return new NoOp();
         }
 
         env = new Environment(env);
-        for (Identifier id: idsToAdd) {
-            env.put(id.getId(), id);
+        ASTNode seq = buildSequence(ctx.statement());
+        env = env.outer();
+
+        return seq;
+    }
+
+
+
+
+    private ASTNode buildSequence(List<BranziParser.StatementContext> statement) {
+        // Costruisce sequenza di nodi con la lista di statement forniti
+        if (statement.size() == 0) {
+            return new NoOp();
         }
 
-        System.out.println(env);
-
-        if (ctx.statement().size() == 1) {
-            ASTNode result = this.visit(ctx.statement(0));
-            env = env.outer();
-            return result;
+        // Solo un elemento => nessuna Sequence
+        if (statement.size() == 1) {
+            return this.visit(statement.get(0));
         }
 
-        ASTNode fstNode = this.visit(ctx.statement(0));
-        ASTNode sndNode = this.visit(ctx.statement(1));
+        ASTNode fstNode = this.visit(statement.get(0));
+        ASTNode sndNode = this.visit(statement.get(1));
         ASTNode sequence = new Sequence(fstNode, sndNode);
-        for (BranziParser.StatementContext sc : ctx.statement().subList(2, ctx.statement().size())) {
+        for (BranziParser.StatementContext sc : statement.subList(2, statement.size())) {
             ASTNode newNode = this.visit(sc);
             sequence = new Sequence(sequence, newNode);
         }
 
-        env = env.outer();
         return sequence;
     }
 
+
+    @Override
+    public ASTNode visitEmptyReturn(BranziParser.EmptyReturnContext ctx) {
+        return new Return(new NoOp());
+    }
+
+    @Override
+    public ASTNode visitHappyReturn(BranziParser.HappyReturnContext ctx) {
+        System.out.println(env);
+        return new Return(this.visit(ctx.expr()));
+    }
 
 
     @Override
@@ -203,26 +247,6 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
 
 
 
-//    @Override
-//    public ASTNode visitExprArrayAccess(BranziParser.ExprArrayAccessContext ctx) {
-//        return this.visit(ctx.array_access());
-//    }
-//
-//    @Override
-//    public ASTNode visitExprArrayExplicit(BranziParser.ExprArrayExplicitContext ctx) {
-//        return this.visit(ctx.array_explicit());
-//    }
-//
-//    @Override
-//    public ASTNode visitExprBool(BranziParser.ExprBoolContext ctx) {
-//        return this.visit(ctx.boolean_expr());
-//    }
-//
-//    @Override
-//    public ASTNode visitLvalueArrayAccess(BranziParser.LvalueArrayAccessContext ctx) {
-//        return this.visit(ctx.array_access());
-//    }
-
     @Override
     public ASTNode visitLvalueSimpleVar(BranziParser.LvalueSimpleVarContext ctx) {
         return env.get(ctx.IDENTIFIER().getText());
@@ -298,6 +322,7 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
             case "int": return Type.INT;
             case "any": return Type.ANY;
             case "bool": return Type.BOOL;
+            case "void": return Type.VOID;
             default: return null;
         }
     }

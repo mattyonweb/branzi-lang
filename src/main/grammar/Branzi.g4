@@ -64,12 +64,19 @@ array_explicit
 ///////////////////////
 
 function_declaration
-    : 'function' Name = IDENTIFIER ':' type  '('  ')'  block # funcDeclEmptyArgs
+    : 'function' Name = IDENTIFIER ':' type  '('  ')'
+            '{' function_body+=statement*
+                return_stmt  '}'              # funcDeclEmptyArgs
     | 'function' Name = IDENTIFIER ':' type
-                  '(' arg1 = IDENTIFIER (',' otherArgs+=IDENTIFIER)* ')'
-                  block # funcDeclNonEmptyArgs
+             '(' arg1 = IDENTIFIER (',' otherArgs+=IDENTIFIER)* ')'
+             '{' function_body+=statement*
+                 return_stmt  '}'             # funcDeclNonEmptyArgs
     ;
 
+return_stmt
+    : 'return' ';'       # emptyReturn
+    | 'return' expr ';'  # happyReturn
+    ;
 
 ///////////////////////
 
@@ -85,6 +92,7 @@ T_INT : 'int';
 T_BOOL : 'bool';
 T_LIST : 'list';
 T_ANY  : 'any';
+T_VOID  : 'void';
 
 type
     : simple_type
@@ -93,7 +101,7 @@ type
 
 simple_type
     : '(' simple_type ')'   # parensType
-    | basetype=(T_INT|T_BOOL|T_ANY)  # baseType
+    | basetype=(T_INT|T_BOOL|T_ANY|T_VOID)  # baseType
     | T_LIST simple_type    # arrayType
     ;
 

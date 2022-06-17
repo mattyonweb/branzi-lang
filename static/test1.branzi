@@ -1,4 +1,5 @@
-function nomefunc : (int -> bool -> int) (n, l) {
+function nomefunc : (int -> bool -> void) (n, l) {
     b : int := n + n;
+    return;
 }
 

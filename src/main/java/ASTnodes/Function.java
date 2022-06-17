@@ -9,12 +9,14 @@ public class Function extends ASTNode{
     private final Type funcType;
     private final List<Identifier> funcArgs;
     private final ASTNode body;
+    private final ASTNode returnNode;
 
-    public Function(Identifier funcId, Type funcType, List<Identifier> funcArgs, ASTNode body) {
+    public Function(Identifier funcId, Type funcType, List<Identifier> funcArgs, ASTNode body, ASTNode returnNode) {
         this.funcId = funcId;
         this.funcType = funcType;
         this.funcArgs = funcArgs;
         this.body = body;
+        this.returnNode = returnNode;
     }
 
     @Override
@@ -41,6 +43,13 @@ public class Function extends ASTNode{
         }
 
         this.body.typecheck();
+
+        TypeCheckerFail.verify(
+                "Return statement and function signature have different types",
+                this,
+                this.typeof(),
+                this.returnNode.typeof()
+        );
     }
 
     @Override
