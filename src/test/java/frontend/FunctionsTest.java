@@ -1,3 +1,5 @@
+package frontend;
+
 import ASTnodes.ASTNode;
 import ASTnodes.TypeCheckerFail;
 import FrontEnd.FrontEnd;
@@ -6,35 +8,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.JUnitException;
 
 import java.io.IOException;
+import static frontend.Utils.typechecks;
+import static frontend.Utils.typecheck_fail;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
 class FunctionsTest {
-    FrontEnd frontEnd;
-
-    void typechecks(String s) throws IOException, TypeCheckerFail {
-        ASTNode node = frontEnd.ast_of_string(s);
-        System.out.println(node);
-        node.typecheck();
-    }
-
-    void typecheck_fail(String s) {
-        try {
-            typechecks(s);
-        } catch (TypeCheckerFail e) {
-            return;
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
-        fail();
-    }
-
-    @BeforeEach
-    void setUp() {
-        frontEnd = new FrontEnd();
-    }
-
     @Test
     void testFuncBase1() throws IOException, TypeCheckerFail {
         typechecks(

@@ -44,6 +44,7 @@ public class MyArray extends ASTNode {
         return "MyArray{" +
                 "list=" + list +
                 " assignedType=" + assignedType +
+                " candidateType=" + typeFromElements +
                 '}';
     }
 
@@ -67,12 +68,16 @@ public class MyArray extends ASTNode {
         }
 
         if (this.typeFromElements != null && this.assignedType != null) {
-            TypeCheckerFail.verify(
-                    "User-given type and calculated type don't coincide",
-                    this,
-                    this.typeFromElements,
-                    this.assignedType
-            );
+
+            // ES.  l: list list int := [[1,2], 666]
+            // Il typeFromElements è list any, ma il typeAssigned è list list int
+            // Se typeFromElements <= typeAssigned ok, ma viceversa no
+            if (! Type.subtype(this.typeFromElements, this.assignedType)) {
+                throw new TypeCheckerFail(
+                        "Calculated type is not a subtype of declared array type",
+                        this, this.assignedType, this.typeFromElements
+                );
+            }
 
             this.list.forEach(ASTNode::typecheck);
         }
