@@ -1,5 +1,7 @@
 package ASTnodes;
 
+import org.antlr.v4.runtime.misc.NotNull;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,21 +15,21 @@ public class Type extends ASTNode {
 
     /////////////////////////////////
 
-    private String type;
+    private String typeName;
     private final List<Type> parameters;
 
-    public Type(String type) {
-        this.type = type;
+    public Type(String typeName) {
+        this.typeName = typeName;
         this.parameters = Arrays.asList();
     }
 
-    public Type(String type, List<Type> parameters) {
-        this.type = type;
+    public Type(String typeName, List<Type> parameters) {
+        this.typeName = typeName;
         this.parameters = parameters;
     }
 
-    public Type(String type, Type ... parameters) {
-        this.type = type;
+    public Type(String typeName, Type ... parameters) {
+        this.typeName = typeName;
         this.parameters = Arrays.asList(parameters);
     }
 
@@ -46,31 +48,80 @@ public class Type extends ASTNode {
     public boolean isCompund() {
         return this.parameters.size() > 0;
     }
-    public boolean isFunction() { return this.type.equals("function"); }
+    public boolean isFunction() { return this.typeName.equals("function"); }
     //////////////////////////////////
+
+    public static Type mostGeneralType(List<Type> types) {
+          if (types.size() == 0)
+              return Type.TBD;
+
+          Type candidate = types.get(0);
+          for (Type t: types) {
+              if (Type.subtype(t, candidate))       // es. TBD <= INT  -->  candidate = INT
+                  continue;
+              else if (Type.subtype(candidate, t))  // es. INT <= ANY  -->  new_candidate = ANY
+                  candidate = t;
+              else  // es. List INT e BOOL sono incomparabili => type error => MGT è ANY
+                  candidate = Type.ANY;
+          }
+
+          return candidate;
+    }
+
+    public static boolean equality(Type t1, Type t2) {
+        if (!t1.typeName.equals(t2.typeName))
+            return false;
+
+        // Se i tipi base combaciano e sono entrambi tipi semplici
+        if (t1.parameters.size() == 0 && t2.parameters.size() == 0)
+            return true;
+
+        // Se uno è un tipo semplice ma l'altro è composto
+        if ((t1.parameters.size() == 0) ^ (t2.parameters.size() == 0))
+            return false;
+
+        // Se hanno numero diverso di type parameters
+        if (t1.parameters.size() != t2.parameters.size())
+            return false;
+
+        for (int i = 0; i < t1.parameters.size(); i++) {
+            if (!Type.equality(t1.parameters.get(i), t2.parameters.get(i)))
+                return false;
+        }
+
+        return true;
+    }
 
     public static boolean subtype(Type t1, Type t2) {
         // Is t1 <= t2?
 
+        // Of course, if t1 = t2 then t1 <= t2
+        if (Type.equality(t1, t2))
+            return true;
+
         // t <= Any, for all t
-        if (t2.type.equals("any")) { // NON cambiare con t2.equals(Type.ANY). Non va, e fallisce silenziosamente
+        if (t2.typeName.equals("any")) { // NON cambiare con t2.equals(Type.ANY). Non va, e fallisce silenziosamente
             return true;
         }
 
-        if (t1.equals(Type.TBD) || t2.equals(Type.TBD)) {
+        if (t1.equals(Type.TBD)) {
+            return true;
+        }
+
+        if (t2.equals(Type.TBD)) {
             return false;
         }
 
         // Follows: type equality
-        if (!t1.type.equals(t2.type))
+        if (!t1.typeName.equals(t2.typeName))
             return false;
 
         // Se i tipi base combaciano e sono entrambi tipi semplici
-        if (t1.parameters == null && t2.parameters == null)
+        if (t1.parameters.size() == 0 && t2.parameters.size() == 0)
             return true;
 
         // Se uno è un tipo semplice ma l'altro è composto
-        if ((t1.parameters == null) ^ (t2.parameters == null))
+        if ((t1.parameters.size() == 0) ^ (t2.parameters.size() == 0))
             return false;
 
         // Se hanno numero diverso di type parameters
@@ -116,16 +167,17 @@ public class Type extends ASTNode {
     }
 
     public String getTypeName() {
-        return this.type;
+        return this.typeName;
     }
 
     @Override
     public String toString() {
-        String s = type;
+        String s = typeName;
 
         if (parameters == null || parameters.size() == 0)
             return s;
 
         return s + parameters;
     }
+
 }

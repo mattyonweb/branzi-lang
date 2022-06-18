@@ -19,7 +19,10 @@ public class ArrayTest {
     @Test
     void testNestedList() throws IOException, TypeCheckerFail {
         typechecks("{l: list list int := [[1,2],[3]];}");
-        typechecks("{l: list list list int := [[[1,2],[3]], []];}");
+        typechecks("{l: list list list int := [ [[1,2],[3]], []];}");
+        typechecks("{l: list list list int := [];}");
+        typechecks("{l: list list list int := [[],[],[]];}");
+        typechecks("{l: list list list int := [[[]],[[]],[[]]];}");
         typechecks("{l: list any := [1,true,l];}");
     }
 
@@ -27,6 +30,8 @@ public class ArrayTest {
     void testNestedListWrong() throws IOException, TypeCheckerFail {
         typecheck_fail("{l: list list int := [[1,2],666];}");
         typecheck_fail("{l: list list list int := [[[1,2],[3]], 666];}");
+        typecheck_fail("{l: list list list int := [[],3,[]];}");
+        typecheck_fail("{l: list list list int := [[],[[[]]],[]];}");
     }
 
     @Test

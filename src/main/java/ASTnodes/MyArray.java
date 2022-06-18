@@ -1,6 +1,8 @@
 package ASTnodes;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class MyArray extends ASTNode {
     private ArrayList<ASTNode> list;
@@ -14,17 +16,24 @@ public class MyArray extends ASTNode {
 
     private Type deduceType() {
         // Deduce type by scanning elements of the list
-        if (this.list.size() == 0)
-            return Type.List(Type.ANY);
+        List<Type> argsTypes = this.list
+                .stream()
+                .map(ASTNode::typeof)
+                .collect(Collectors.toList());
 
-        Type candidateType = this.list.get(0).typeof();
+        return Type.List(Type.mostGeneralType(argsTypes));
 
-        for (ASTNode x: this.list) {
-            if (! Type.subtype(x.typeof(), candidateType))
-                return Type.List(Type.ANY);
-        }
-
-        return Type.List(candidateType);
+//        if (this.list.size() == 0)
+//            return Type.List(Type.ANY);
+//
+//        Type candidateType = this.list.get(0).typeof();
+//
+//        for (ASTNode x: this.list) {
+//            if (! Type.subtype(x.typeof(), candidateType))
+//                return Type.List(Type.ANY);
+//        }
+//
+//        return Type.List(candidateType);
     }
 
     public void setAssignedType(Type assignedType) {
@@ -68,6 +77,10 @@ public class MyArray extends ASTNode {
         }
 
         if (this.typeFromElements != null && this.assignedType != null) {
+
+            // La lista vuota non ha bisogno di ulteriore typecheck
+            if (this.list.size() == 0)
+                return;
 
             // ES.  l: list list int := [[1,2], 666]
             // Il typeFromElements è list any, ma il typeAssigned è list list int
