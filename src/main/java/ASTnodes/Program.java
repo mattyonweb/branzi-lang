@@ -21,6 +21,8 @@ public class Program extends ASTNode {
         }
     }
 
+    /////////////////////////////
+
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder("Program{");
@@ -28,5 +30,9 @@ public class Program extends ASTNode {
             s.append("\n").append(n).append("\n");
         }
         return s + "}";
+    }
+
+    public List<ASTNode> getUnits() {
+        return units;
     }
 }

@@ -16,4 +16,9 @@ public class Bool extends ASTNode {
     public void typecheck() throws TypeCheckerFail {
         // Nothing to do
     }
+
+    @Override
+    public String toString() {
+        return "Bool{" + b + "}";
+    }
 }

@@ -95,4 +95,11 @@ public class MyArray extends ASTNode {
             this.list.forEach(ASTNode::typecheck);
         }
     }
+
+    ////////////////////////////////
+
+
+    public ArrayList<ASTNode> getList() {
+        return list;
+    }
 }

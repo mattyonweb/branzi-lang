@@ -52,11 +52,21 @@ public class Funcall extends ASTNode {
         }
     }
 
+    //////////////////////////////
+
     @Override
     public String toString() {
         return "Funcall{" +
                 "funcId=" + funcId +
                 ", args=" + args +
                 '}';
+    }
+
+    public Identifier getFuncId() {
+        return funcId;
+    }
+
+    public List<ASTNode> getArgs() {
+        return args;
     }
 }

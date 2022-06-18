@@ -5,7 +5,6 @@ import ASTnodes.Number;
 import generated.BranziBaseVisitor;
 import generated.BranziParser;
 import org.antlr.v4.runtime.Token;
-import org.javatuples.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,7 +42,7 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
         env.putAtOutermost(funcname, funcId);
 
         // Ottieni AST del body della funzione
-        ASTNode funcBody = buildSequence(ctx.function_body);
+        ASTNode funcBody = buildSequence_StatementContext(ctx.function_body);
 
         // AST del Return
         ASTNode funcReturn = this.visit(ctx.return_stmt());
@@ -101,7 +100,7 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
         functions.put(funcId, null);
 
         // Ottieni AST del body della funzione
-        ASTNode funcBody = buildSequence(ctx.function_body);
+        ASTNode funcBody = buildSequence_StatementContext(ctx.function_body);
 
         // AST del Return
         ASTNode funcReturn = this.visit(ctx.return_stmt());
@@ -190,16 +189,12 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
         }
 
         env = new Environment(env);
-        ASTNode seq = buildSequence(ctx.statement());
+        ASTNode seq = buildSequence_StatementContext(ctx.statement());
         env = env.outer();
 
         return seq;
     }
-
-
-
-
-    private ASTNode buildSequence(List<BranziParser.StatementContext> statement) {
+    private ASTNode buildSequence_StatementContext(List<BranziParser.StatementContext> statement) {
         // Costruisce sequenza di nodi con la lista di statement forniti
         if (statement.size() == 0) {
             return new NoOp();
@@ -242,7 +237,55 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitWhile_statement(BranziParser.While_statementContext ctx) {
-        return super.visitWhile_statement(ctx); // TODO
+        return new While(
+                this.visit(ctx.expr()),
+                this.visit(ctx.block_brk_cnt())
+        );
+    }
+
+    @Override
+    public ASTNode visitBlock_brk_cnt(BranziParser.Block_brk_cntContext ctx) {
+        // Visita blocco "nudo", ie. NON il blocco di una funcdef
+        if (ctx.statement_brk_cnt().size() == 0) {
+            return new NoOp();
+        }
+
+        env = new Environment(env);
+        ASTNode seq = buildSequence_statement_brk_cntContext(ctx.statement_brk_cnt());
+        env = env.outer();
+
+        return seq;
+    }
+    private ASTNode buildSequence_statement_brk_cntContext(List<BranziParser.Statement_brk_cntContext> statement) {
+        // Costruisce sequenza di nodi con la lista di statement forniti
+        if (statement.size() == 0) {
+            return new NoOp();
+        }
+
+        // Solo un elemento => nessuna Sequence
+        if (statement.size() == 1) {
+            return this.visit(statement.get(0));
+        }
+
+        ASTNode fstNode = this.visit(statement.get(0));
+        ASTNode sndNode = this.visit(statement.get(1));
+        ASTNode sequence = new Sequence(fstNode, sndNode);
+        for (BranziParser.Statement_brk_cntContext sc : statement.subList(2, statement.size())) {
+            ASTNode newNode = this.visit(sc);
+            sequence = new Sequence(sequence, newNode);
+        }
+
+        return sequence;
+    }
+
+    @Override
+    public ASTNode visitBreak_statement(BranziParser.Break_statementContext ctx) {
+        return new Break();
+    }
+
+    @Override
+    public ASTNode visitContinue_statement(BranziParser.Continue_statementContext ctx) {
+        return new Continue();
     }
 
     @Override
@@ -256,7 +299,15 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitAddSub(BranziParser.AddSubContext ctx) {
-        System.out.println(this.visit(ctx.Left));
+        return new BinOp(
+                this.visit(ctx.Left),
+                ctx.Op.getText(),
+                this.visit(ctx.Right)
+        );
+    }
+
+    @Override
+    public ASTNode visitEqTest(BranziParser.EqTestContext ctx) {
         return new BinOp(
                 this.visit(ctx.Left),
                 ctx.Op.getText(),
@@ -372,6 +423,11 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitBoolParens(BranziParser.BoolParensContext ctx) {
         return this.visit(ctx.boolean_expr());
+    }
+
+    @Override
+    public ASTNode visitBoolIdentifier(BranziParser.BoolIdentifierContext ctx) {
+        return env.get(ctx.IDENTIFIER().getText());
     }
 
     @Override

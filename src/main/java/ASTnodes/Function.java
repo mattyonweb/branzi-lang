@@ -57,6 +57,8 @@ public class Function extends ASTNode{
         );
     }
 
+    ///////////////////////////////7
+
     @Override
     public String toString() {
         return "Function{" +
@@ -66,5 +68,21 @@ public class Function extends ASTNode{
                 "\n\tbody=" + body +
                 "\n\treturn=" + returnNode +
                 '}';
+    }
+
+    public Type getFuncType() {
+        return funcType;
+    }
+
+    public List<Identifier> getFuncArgs() {
+        return funcArgs;
+    }
+
+    public ASTNode getBody() {
+        return body;
+    }
+
+    public ASTNode getReturnNode() {
+        return returnNode;
     }
 }

@@ -1,10 +1,6 @@
-function nomefunc : (int -> bool -> void) (n, l) {
-    b : int := n + n;
-    return;
-}
+function foo : (bool -> int) (b) {
+    while ((true and b) != (false or (false and b))) { b=true;}
 
-function noargs : int () { return 666; }
-
-function main : int -> int (x) {
-    return noargs();
+    x: bool := true or b;
+    return 2;
 }

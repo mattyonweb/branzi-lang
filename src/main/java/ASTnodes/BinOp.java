@@ -17,6 +17,14 @@ public class BinOp extends ASTNode {
         opTypes.put("and", Type.Function(Type.BOOL, Type.BOOL, Type.BOOL));
         opTypes.put("or", Type.Function(Type.BOOL, Type.BOOL, Type.BOOL));
         opTypes.put("xor", Type.Function(Type.BOOL, Type.BOOL, Type.BOOL));
+
+        opTypes.put("==", Type.Function(Type.ANY, Type.ANY, Type.BOOL));
+        opTypes.put("!=", Type.Function(Type.ANY, Type.ANY, Type.BOOL));
+
+        opTypes.put("<", Type.Function(Type.INT, Type.INT, Type.BOOL));
+        opTypes.put(">", Type.Function(Type.INT, Type.INT, Type.BOOL));
+        opTypes.put("<=", Type.Function(Type.INT, Type.INT, Type.BOOL));
+        opTypes.put(">=", Type.Function(Type.INT, Type.INT, Type.BOOL));
     }
 
     public BinOp(ASTNode arg1, String op, ASTNode arg2) {
@@ -49,15 +57,29 @@ public class BinOp extends ASTNode {
         TypeCheckerFail.verify(
                 "First argument of binary operator has invalid type",
                 this,
-                this.arg1.typeof(),
-                opTypes.get(this.op).getParameter(0)
+                opTypes.get(this.op).getParameter(0),
+                this.arg1.typeof()
         );
 
         TypeCheckerFail.verify(
                 "Second argument of binary operator has invalid type",
                 this,
-                this.arg2.typeof(),
-                opTypes.get(this.op).getParameter(1)
+                opTypes.get(this.op).getParameter(1),
+                this.arg2.typeof()
         );
+    }
+
+    //////////////////////
+
+    public ASTNode getArg1() {
+        return arg1;
+    }
+
+    public String getOp() {
+        return op;
+    }
+
+    public ASTNode getArg2() {
+        return arg2;
     }
 }

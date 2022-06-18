@@ -5,4 +5,5 @@ import FrontEnd.Environment;
 public abstract class ASTNode {
     public abstract Type typeof();
     public abstract void typecheck() throws TypeCheckerFail;
+    // public abstract void astvisit(ASTVisitor visitor);
 }

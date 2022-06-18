@@ -68,36 +68,8 @@ public class Type extends ASTNode {
           return candidate;
     }
 
-    public static boolean equality(Type t1, Type t2) {
-        if (!t1.typeName.equals(t2.typeName))
-            return false;
-
-        // Se i tipi base combaciano e sono entrambi tipi semplici
-        if (t1.parameters.size() == 0 && t2.parameters.size() == 0)
-            return true;
-
-        // Se uno è un tipo semplice ma l'altro è composto
-        if ((t1.parameters.size() == 0) ^ (t2.parameters.size() == 0))
-            return false;
-
-        // Se hanno numero diverso di type parameters
-        if (t1.parameters.size() != t2.parameters.size())
-            return false;
-
-        for (int i = 0; i < t1.parameters.size(); i++) {
-            if (!Type.equality(t1.parameters.get(i), t2.parameters.get(i)))
-                return false;
-        }
-
-        return true;
-    }
-
     public static boolean subtype(Type t1, Type t2) {
         // Is t1 <= t2?
-
-        // Of course, if t1 = t2 then t1 <= t2
-        if (Type.equality(t1, t2))
-            return true;
 
         // t <= Any, for all t
         if (t2.typeName.equals("any")) { // NON cambiare con t2.equals(Type.ANY). Non va, e fallisce silenziosamente
@@ -135,6 +107,11 @@ public class Type extends ASTNode {
 
         return true;
     }
+
+    public static boolean equality(Type t1, Type t2) {
+        return subtype(t1, t2) && subtype(t2, t1);
+    }
+
 
     ///////////////////////////////////
 

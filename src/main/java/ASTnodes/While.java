@@ -1,12 +1,12 @@
 package ASTnodes;
 
-public class If extends ASTNode {
-    private final ASTNode condition;
-    private final ASTNode code;
+public class While extends ASTNode {
+    private ASTNode condition;
+    private ASTNode block;
 
-    public If(ASTNode condition, ASTNode code) {
+    public While(ASTNode condition, ASTNode block) {
         this.condition = condition;
-        this.code = code;
+        this.block = block;
     }
 
     @Override
@@ -17,30 +17,22 @@ public class If extends ASTNode {
     @Override
     public void typecheck() throws TypeCheckerFail {
         TypeCheckerFail.verify(
-                "Condition of IF is not of boolean type",
+                "Condition of WHILE is not of boolean type",
                 this.condition,
                 this.condition.typeof(),
                 Type.BOOL
         );
         this.condition.typecheck();
-        this.code.typecheck();
+        this.block.typecheck();
     }
 
-    /////////////////////
+    ///////////////////7
 
     @Override
     public String toString() {
-        return "If{" +
+        return "While{" +
                 "condition=" + condition +
-                ", code=" + code +
+                "\n\tblock=" + block +
                 '}';
-    }
-
-    public ASTNode getCondition() {
-        return condition;
-    }
-
-    public ASTNode getCode() {
-        return code;
     }
 }
