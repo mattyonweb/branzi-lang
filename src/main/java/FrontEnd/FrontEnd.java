@@ -1,7 +1,9 @@
 package FrontEnd;
 
 import ASTnodes.ASTNode;
-import ASTnodes.Type;
+import ASTnodes.ASTvisitors.ASTModifier;
+import ASTnodes.ASTvisitors.OptimizerMathExpr;
+import ASTnodes.ASTvisitors.OptimizerRemoveDeadCodeInFunction;
 import ASTnodes.TypeCheckerFail;
 import generated.BranziLexer;
 import generated.BranziParser;
@@ -15,6 +17,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 public class FrontEnd {
     public static void main(String[] ss) throws IOException, TypeCheckerFail {
@@ -26,6 +29,33 @@ public class FrontEnd {
 
         visit.typecheck();
     }
+
+    public ASTNode getOptimizedAST(String s) throws IOException {
+        return getAST(
+                s, List.of(new OptimizerMathExpr(), new OptimizerRemoveDeadCodeInFunction())
+        );
+    }
+
+    public ASTNode getAST(String s, List<ASTModifier> optimizations) throws IOException {
+        ASTNode ast = this.ast_of_string(s);
+
+        ast.typecheck();
+
+        for (ASTModifier visitor: optimizations) {
+            ast = ast.astmodify(visitor);
+        }
+
+        return ast;
+    }
+
+    private ASTNode optimizeWith(ASTNode ast, ASTModifier visitor) {
+        return ast.astmodify(visitor);
+    }
+
+    private void typecheck(ASTNode ast) {
+        ast.typecheck();
+    }
+
 
     public ASTNode ast_of(String fpath) throws IOException {
         BranziLexer lexer = new BranziLexer(new ANTLRFileStream(fpath));
