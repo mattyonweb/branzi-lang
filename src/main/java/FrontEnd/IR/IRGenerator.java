@@ -4,6 +4,7 @@ import ASTnodes.*;
 import ASTnodes.ASTvisitors.ASTVisitor;
 import ASTnodes.If;
 import ASTnodes.Number;
+import org.objectweb.asm.Label;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,7 @@ public class IRGenerator extends ASTVisitor {
     public void visitBinOp(BinOp bo) {
         super.visitBinOp(bo);
         instructions.add(
-                new Operation(Operation.convert(bo.getOp()))
+                new Operation(bo.getOp(), BinOp.opTypes.get(bo.getOp()))
         );
     }
 
@@ -50,7 +51,7 @@ public class IRGenerator extends ASTVisitor {
 
     @Override
     public void visitIf(If i) {
-        LabelIR label = new LabelIR();
+        LabelIR label = new LabelIR(new Label());
 
         i.getCondition().astvisit(this);
         instructions.add(new IfTrue(label));

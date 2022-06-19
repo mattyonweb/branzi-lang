@@ -1,6 +1,9 @@
 package FrontEnd.IR;
 
-public class If extends IRInstruction {
+import BackEnd.VarTable;
+import org.objectweb.asm.MethodVisitor;
+
+public abstract class If extends IRInstruction {
     public final LabelIR elseGoto;
 
     public static enum Op {EQ, NEQ, LT, LET, GT, GET};

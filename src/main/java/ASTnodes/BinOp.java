@@ -10,7 +10,7 @@ public class BinOp extends ASTNode {
     private String op;
     private ASTNode arg2;
 
-    private static final HashMap<String, Type> opTypes = new HashMap<>();
+    public static final HashMap<String, Type> opTypes = new HashMap<>();
     static {
         opTypes.put("+", Type.Function(Type.INT, Type.INT, Type.INT));
         opTypes.put("*", Type.Function(Type.INT, Type.INT, Type.INT));
