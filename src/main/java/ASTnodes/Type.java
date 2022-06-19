@@ -1,6 +1,7 @@
 package ASTnodes;
 
-import org.antlr.v4.runtime.misc.NotNull;
+import ASTnodes.ASTvisitors.ASTModifier;
+import ASTnodes.ASTvisitors.ASTVisitor;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,7 +17,7 @@ public class Type extends ASTNode {
     /////////////////////////////////
 
     private String typeName;
-    private final List<Type> parameters;
+    private List<Type> parameters;
 
     public Type(String typeName) {
         this.typeName = typeName;
@@ -43,6 +44,16 @@ public class Type extends ASTNode {
     @Override
     public void typecheck() throws TypeCheckerFail {
         // Nothing to do (?)
+    }
+
+    @Override
+    public void astvisit(ASTVisitor visitor) {
+        visitor.visitType(this);
+    }
+
+    @Override
+    public ASTNode astmodify(ASTModifier visitor) {
+        return visitor.visitType(this);
     }
 
     public boolean isCompund() {
@@ -157,4 +168,11 @@ public class Type extends ASTNode {
         return s + parameters;
     }
 
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
+    }
+
+    public void setParameters(List<Type> parameters) {
+        this.parameters = parameters;
+    }
 }

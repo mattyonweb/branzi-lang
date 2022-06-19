@@ -21,4 +21,11 @@ public class MiscTest {
                         "return 1;}"
         );
     }
+
+    @Test
+    public void complexBool() throws IOException {
+        typechecks(
+                "{ b: bool := true and ((4+7) == 10); }"
+        );
+    }
 }

@@ -1,8 +1,11 @@
 package ASTnodes;
 
+import ASTnodes.ASTvisitors.ASTModifier;
+import ASTnodes.ASTvisitors.ASTVisitor;
+
 public class ArrayAccess extends ASTNode {
-    private final ASTNode id;
-    private final ASTNode offset;
+    private ASTNode id;
+    private ASTNode offset;
 
     public ArrayAccess(ASTNode id, ASTNode offset) {
         this.id = id;
@@ -50,5 +53,23 @@ public class ArrayAccess extends ASTNode {
             );
 
 
+    }
+
+    @Override
+    public void astvisit(ASTVisitor visitor) {
+        visitor.visitArrayAccess(this);
+    }
+
+    @Override
+    public ASTNode astmodify(ASTModifier visitor) {
+        return visitor.visitArrayAccess(this);
+    }
+
+    public void setId(ASTNode id) {
+        this.id = id;
+    }
+
+    public void setOffset(ASTNode offset) {
+        this.offset = offset;
     }
 }

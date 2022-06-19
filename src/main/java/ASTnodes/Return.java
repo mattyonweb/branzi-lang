@@ -1,5 +1,8 @@
 package ASTnodes;
 
+import ASTnodes.ASTvisitors.ASTModifier;
+import ASTnodes.ASTvisitors.ASTVisitor;
+
 public class Return extends ASTNode {
     private ASTNode expr;
 
@@ -18,9 +21,23 @@ public class Return extends ASTNode {
     }
 
     @Override
+    public void astvisit(ASTVisitor visitor) {
+        visitor.visitReturn(this);
+    }
+
+    @Override
+    public ASTNode astmodify(ASTModifier visitor) {
+        return visitor.visitReturn(this);
+    }
+
+    @Override
     public String toString() {
         return "Return{" +
                 "expr=" + expr +
                 '}';
+    }
+
+    public ASTNode getExpr() {
+        return expr;
     }
 }

@@ -1,7 +1,10 @@
 package ASTnodes;
 
+import ASTnodes.ASTvisitors.ASTModifier;
+import ASTnodes.ASTvisitors.ASTVisitor;
+
 public class Identifier extends ASTNode {
-    private final String id;
+    private String id;
     private Type type = Type.TBD;
 
     public Identifier(String id) {
@@ -10,6 +13,9 @@ public class Identifier extends ASTNode {
 
     public void setType(Type type) {
         this.type = type;
+    }
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getId() {
@@ -36,5 +42,15 @@ public class Identifier extends ASTNode {
     @Override
     public void typecheck() throws TypeCheckerFail {
         // niente da fare qui
+    }
+
+    @Override
+    public void astvisit(ASTVisitor visitor) {
+        visitor.visitIdentifier(this);
+    }
+
+    @Override
+    public ASTNode astmodify(ASTModifier visitor) {
+        return visitor.visitIdentifier(this);
     }
 }

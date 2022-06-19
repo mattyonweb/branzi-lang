@@ -1,22 +1,25 @@
 package ASTnodes;
 
+import ASTnodes.ASTvisitors.ASTModifier;
+import ASTnodes.ASTvisitors.ASTVisitor;
+
 import java.util.List;
 
 import static java.lang.Math.max;
 
 public class Function extends ASTNode{
-    private final Identifier funcId;
-    private final Type funcType;
-    private final List<Identifier> funcArgs;
-    private final ASTNode body;
-    private final ASTNode returnNode;
+    private Identifier funcId;
+    private Type funcType;
+    private List<Identifier> funcArgs;
+    private ASTNode body;
+    private List<Return> returnNodes;
 
-    public Function(Identifier funcId, Type funcType, List<Identifier> funcArgs, ASTNode body, ASTNode returnNode) {
+    public Function(Identifier funcId, Type funcType, List<Identifier> funcArgs, ASTNode body, List<Return> returnNodes) {
         this.funcId = funcId;
         this.funcType = funcType;
         this.funcArgs = funcArgs;
         this.body = body;
-        this.returnNode = returnNode;
+        this.returnNodes = returnNodes;
     }
 
     public Identifier getFuncId() {
@@ -47,14 +50,27 @@ public class Function extends ASTNode{
         }
 
         this.body.typecheck();
-        this.returnNode.typecheck();
 
-        TypeCheckerFail.verify(
-                "Return statement and function signature have different types",
-                this,
-                this.typeof(),
-                this.returnNode.typeof()
-        );
+        for (Return ret: this.returnNodes) {
+            ret.typecheck();
+
+            TypeCheckerFail.verify(
+                    "Return statement and function signature have different types",
+                    ret,
+                    this.typeof(),
+                    ret.typeof()
+            );
+        }
+    }
+
+    @Override
+    public void astvisit(ASTVisitor visitor) {
+        visitor.visitFunction(this);
+    }
+
+    @Override
+    public ASTNode astmodify(ASTModifier visitor) {
+        return visitor.visitFunction(this);
     }
 
     ///////////////////////////////7
@@ -66,7 +82,7 @@ public class Function extends ASTNode{
                 "\n\tfuncType=" + funcType +
                 "\n\tfuncArgs=" + funcArgs +
                 "\n\tbody=" + body +
-                "\n\treturn=" + returnNode +
+                "\n\treturn=" + returnNodes +
                 '}';
     }
 
@@ -82,7 +98,27 @@ public class Function extends ASTNode{
         return body;
     }
 
-    public ASTNode getReturnNode() {
-        return returnNode;
+    public List<Return> getReturnNodes() {
+        return returnNodes;
+    }
+
+    public void setFuncId(Identifier funcId) {
+        this.funcId = funcId;
+    }
+
+    public void setFuncType(Type funcType) {
+        this.funcType = funcType;
+    }
+
+    public void setFuncArgs(List<Identifier> funcArgs) {
+        this.funcArgs = funcArgs;
+    }
+
+    public void setBody(ASTNode body) {
+        this.body = body;
+    }
+
+    public void setReturnNodes(List<Return> returnNodes) {
+        this.returnNodes = returnNodes;
     }
 }

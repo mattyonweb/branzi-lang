@@ -1,5 +1,8 @@
 package ASTnodes;
 
+import ASTnodes.ASTvisitors.ASTModifier;
+import ASTnodes.ASTvisitors.ASTVisitor;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -7,8 +10,8 @@ import java.util.stream.Collectors;
 import static java.lang.Math.max;
 
 public class Funcall extends ASTNode {
-    private final Identifier funcId;
-    private final List<ASTNode> args = new ArrayList<>();
+    private Identifier funcId;
+    private List<ASTNode> args = new ArrayList<>();
 
     public Funcall(Identifier func, List<ASTNode> args) {
         this.funcId = func;
@@ -52,6 +55,16 @@ public class Funcall extends ASTNode {
         }
     }
 
+    @Override
+    public void astvisit(ASTVisitor visitor) {
+        visitor.visitFuncall(this);
+    }
+
+    @Override
+    public ASTNode astmodify(ASTModifier visitor) {
+        return visitor.visitFuncall(this);
+    }
+
     //////////////////////////////
 
     @Override
@@ -68,5 +81,13 @@ public class Funcall extends ASTNode {
 
     public List<ASTNode> getArgs() {
         return args;
+    }
+
+    public void setFuncId(Identifier funcId) {
+        this.funcId = funcId;
+    }
+
+    public void setArgs(List<ASTNode> args) {
+        this.args = args;
     }
 }

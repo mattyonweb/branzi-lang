@@ -18,6 +18,7 @@ statement
     | while_statement
     | declare_statement
     | update_statement
+    | return_stmt
     | expr_el ;
 
 statement_brk_cnt
@@ -44,6 +45,11 @@ break_statement
 continue_statement
     : 'continue' EL ;
 
+return_stmt
+    : 'return' ';'       # emptyReturn
+    | 'return' expr ';'  # happyReturn
+    ;
+
 /////////////////7
 
 expr_el
@@ -55,9 +61,11 @@ expr
     | Left = expr Op = (TIMES | DIV)  Right = expr    # MulDiv
     | Left = expr Op = (PLUS  | MINUS) Right = expr   # AddSub
     | Left = expr Op = ('=='|'!='|'<'|'<='|'>'|'>=') Right = expr  # EqTest
+    | Left = expr Op = (B_AND|B_OR|B_XOR) Right = expr  # boolBinop
     | array_explicit                                  # ExprArrayExplicit
     | array_access                                    # ExprArrayAccess
-    | boolean_expr                                    # ExprBool
+    | B_TRUE                                          # boolTrue
+    | B_FALSE                                         # boolFalse
     | IDENTIFIER                                      # ExprVar
     | NUMBER                                          # ExprNum
     ;
@@ -85,17 +93,10 @@ array_explicit
 
 function_declaration
     : 'function' Name = IDENTIFIER ':' func_type  '('  ')'
-            '{' function_body+=statement*
-                return_stmt  '}'              # funcDeclEmptyArgs
+             block            # funcDeclEmptyArgs
     | 'function' Name = IDENTIFIER ':' func_type
              '(' arg1 = IDENTIFIER (',' otherArgs+=IDENTIFIER)* ')'
-             '{' function_body+=statement*
-                 return_stmt  '}'             # funcDeclNonEmptyArgs
-    ;
-
-return_stmt
-    : 'return' ';'       # emptyReturn
-    | 'return' expr ';'  # happyReturn
+             block            # funcDeclNonEmptyArgs
     ;
 
 ///////////////////////
@@ -137,14 +138,6 @@ B_OR  : 'or'  ;
 B_NOT : 'not' ;
 B_XOR : 'xor' ;
 
-boolean_expr
-    : B_TRUE  # boolTrue
-    | B_FALSE # boolFalse
-    | '(' boolean_expr ')' # boolParens
-    | B_NOT boolean_expr   # boolNot
-    | Left = boolean_expr Op = (B_AND|B_OR|B_XOR) Right = boolean_expr # boolBinop
-    | IDENTIFIER # boolIdentifier
-    ;
 ///////////////////////////
 
 IDENTIFIER : (LETTER (LETTER | DIGIT)*) ;

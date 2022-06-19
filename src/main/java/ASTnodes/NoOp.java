@@ -1,5 +1,8 @@
 package ASTnodes;
 
+import ASTnodes.ASTvisitors.ASTModifier;
+import ASTnodes.ASTvisitors.ASTVisitor;
+
 public class NoOp extends ASTNode {
 
     @Override
@@ -10,5 +13,14 @@ public class NoOp extends ASTNode {
     @Override
     public void typecheck() throws TypeCheckerFail {
 
+    }
+
+    @Override
+    public void astvisit(ASTVisitor visitor) {
+    }
+
+    @Override
+    public ASTNode astmodify(ASTModifier visitor) {
+        return null;
     }
 }

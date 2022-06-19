@@ -59,7 +59,7 @@ public class ArrayTest {
     void testListUpdate2Func() throws IOException, TypeCheckerFail {
         typechecks(
                 "function subprime : (int -> list int -> list int) (x,l) { l[0] = x; return l; }" +
-                        "{ l: list int := [1,3,5,7]; l = <¹subprime(666, l); }"
+                        "{ l: list int := [1,3,5,7]; l = subprime(666, l); }"
         );
     }
 

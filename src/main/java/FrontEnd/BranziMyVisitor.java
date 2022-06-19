@@ -1,6 +1,7 @@
 package FrontEnd;
 
 import ASTnodes.*;
+import ASTnodes.ASTvisitors.VisitorFindReturnsWithin;
 import ASTnodes.Number;
 import generated.BranziBaseVisitor;
 import generated.BranziParser;
@@ -42,10 +43,8 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
         env.putAtOutermost(funcname, funcId);
 
         // Ottieni AST del body della funzione
-        ASTNode funcBody = buildSequence_StatementContext(ctx.function_body);
-
-        // AST del Return
-        ASTNode funcReturn = this.visit(ctx.return_stmt());
+        ASTNode funcBody         = this.visit(ctx.block());
+        List<Return> funcReturns = this.allReturnsInside(funcBody);
 
         env = env.outer();
 
@@ -54,7 +53,7 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
                 funcType,
                 funcArgs,
                 funcBody,
-                funcReturn
+                funcReturns
         );
 
         // Functions IDS are saved in env
@@ -100,10 +99,8 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
         functions.put(funcId, null);
 
         // Ottieni AST del body della funzione
-        ASTNode funcBody = buildSequence_StatementContext(ctx.function_body);
-
-        // AST del Return
-        ASTNode funcReturn = this.visit(ctx.return_stmt());
+        ASTNode funcBody         = this.visit(ctx.block());
+        List<Return> funcReturns = this.allReturnsInside(funcBody);
 
         env = env.outer();
 
@@ -112,12 +109,20 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
                 funcType,
                 funcArgs,
                 funcBody,
-                funcReturn
+                funcReturns
         );
 
         functions.put(funcId, foo);
         return foo;
     }
+
+
+    private List<Return> allReturnsInside(ASTNode root) {
+        VisitorFindReturnsWithin visitorReturn = new VisitorFindReturnsWithin();
+        root.astvisit(visitorReturn);
+        return visitorReturn.getFound();
+    }
+
 
     private List<Identifier> createTypedVariables(List<String> varNames, Type funcType) {
         if (!funcType.isFunction()) {
@@ -205,6 +210,14 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
             return this.visit(statement.get(0));
         }
 
+//        ASTNode sequence = new NoOp();
+//        for (int i = statement.size()-1; i >= 0; i--) {
+//            sequence = new Sequence(this.visit(statement.get(i)), sequence);
+//        }
+//        System.out.println(sequence);
+//        return sequence;
+
+
         ASTNode fstNode = this.visit(statement.get(0));
         ASTNode sndNode = this.visit(statement.get(1));
         ASTNode sequence = new Sequence(fstNode, sndNode);
@@ -213,6 +226,7 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
             sequence = new Sequence(sequence, newNode);
         }
 
+        System.out.println(sequence);
         return sequence;
     }
 
@@ -276,6 +290,15 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
         }
 
         return sequence;
+
+//        ASTNode sequence = new NoOp();
+//        // Right recursive
+//        for (int i = statement.size()-1; i >= 0; i--) {
+//            sequence = new Sequence(this.visit(statement.get(i)), sequence);
+//        }
+//
+//        System.out.println(sequence);
+//        return sequence;
     }
 
     @Override
@@ -404,11 +427,13 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
         return new Bool(false);
     }
 
-    @Override
-    public ASTNode visitBoolNot(BranziParser.BoolNotContext ctx) {
-        // TODO (crea classe UnaryOp)
-        return null;
-    }
+
+//    @Override
+//    public ASTNode visitBoolNot(BranziParser.BoolNotContext ctx) {
+//        // TODO (crea classe UnaryOp)
+//        return null;
+//    }
+
 
     @Override
     public ASTNode visitBoolBinop(BranziParser.BoolBinopContext ctx) {
@@ -419,16 +444,16 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
         );
     }
 
-    // TODO
-    @Override
-    public ASTNode visitBoolParens(BranziParser.BoolParensContext ctx) {
-        return this.visit(ctx.boolean_expr());
-    }
-
-    @Override
-    public ASTNode visitBoolIdentifier(BranziParser.BoolIdentifierContext ctx) {
-        return env.get(ctx.IDENTIFIER().getText());
-    }
+//    // TODO
+//    @Override
+//    public ASTNode visitBoolParens(BranziParser.BoolParensContext ctx) {
+//        return this.visit(ctx.boolean_expr());
+//    }
+//
+//    @Override
+//    public ASTNode visitBoolIdentifier(BranziParser.BoolIdentifierContext ctx) {
+//        return env.get(ctx.IDENTIFIER().getText());
+//    }
 
     @Override
     public ASTNode visitParensType(BranziParser.ParensTypeContext ctx) {

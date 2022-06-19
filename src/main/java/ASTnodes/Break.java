@@ -1,5 +1,8 @@
 package ASTnodes;
 
+import ASTnodes.ASTvisitors.ASTModifier;
+import ASTnodes.ASTvisitors.ASTVisitor;
+
 public class Break extends ASTNode {
     private While while_;
 
@@ -14,5 +17,15 @@ public class Break extends ASTNode {
 
     @Override
     public void typecheck() throws TypeCheckerFail {
+    }
+
+    @Override
+    public void astvisit(ASTVisitor visitor) {
+        visitor.visitBreak(this);
+    }
+
+    @Override
+    public ASTNode astmodify(ASTModifier visitor) {
+        return visitor.visitBreak(this);
     }
 }

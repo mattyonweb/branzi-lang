@@ -1,8 +1,11 @@
 package ASTnodes;
 
+import ASTnodes.ASTvisitors.ASTModifier;
+import ASTnodes.ASTvisitors.ASTVisitor;
+
 public class If extends ASTNode {
-    private final ASTNode condition;
-    private final ASTNode code;
+    private ASTNode condition;
+    private ASTNode code;
 
     public If(ASTNode condition, ASTNode code) {
         this.condition = condition;
@@ -26,6 +29,16 @@ public class If extends ASTNode {
         this.code.typecheck();
     }
 
+    @Override
+    public void astvisit(ASTVisitor visitor) {
+        visitor.visitIf(this);
+    }
+
+    @Override
+    public ASTNode astmodify(ASTModifier visitor) {
+        return visitor.visitIf(this);
+    }
+
     /////////////////////
 
     @Override
@@ -42,5 +55,13 @@ public class If extends ASTNode {
 
     public ASTNode getCode() {
         return code;
+    }
+
+    public void setCondition(ASTNode condition) {
+        this.condition = condition;
+    }
+
+    public void setCode(ASTNode code) {
+        this.code = code;
     }
 }

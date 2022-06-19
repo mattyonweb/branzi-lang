@@ -1,5 +1,8 @@
 package ASTnodes;
 
+import ASTnodes.ASTvisitors.ASTModifier;
+import ASTnodes.ASTvisitors.ASTVisitor;
+
 public class While extends ASTNode {
     private ASTNode condition;
     private ASTNode block;
@@ -26,6 +29,16 @@ public class While extends ASTNode {
         this.block.typecheck();
     }
 
+    @Override
+    public void astvisit(ASTVisitor visitor) {
+        visitor.visitWhile(this);
+    }
+
+    @Override
+    public ASTNode astmodify(ASTModifier visitor) {
+        return visitor.visitWhile(this);
+    }
+
     ///////////////////7
 
     @Override
@@ -34,5 +47,21 @@ public class While extends ASTNode {
                 "condition=" + condition +
                 "\n\tblock=" + block +
                 '}';
+    }
+
+    public ASTNode getCondition() {
+        return condition;
+    }
+
+    public ASTNode getBlock() {
+        return block;
+    }
+
+    public void setCondition(ASTNode condition) {
+        this.condition = condition;
+    }
+
+    public void setBlock(ASTNode block) {
+        this.block = block;
     }
 }

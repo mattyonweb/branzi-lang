@@ -216,4 +216,18 @@ class FunctionsTest {
                 "function reallyWrongFact : int -> int (n) {return reallyWrongFact(n, n-1);}"
         );
     }
+
+    @Test
+    void testFuncManyReturns() throws IOException, TypeCheckerFail {
+        typecheck_fail(
+                "function foo : int () { if (false) {return true;} while (1==2){return true;} return false; }"
+        );
+    }
+
+    @Test
+    void testFuncManyReturnsFail() throws IOException, TypeCheckerFail {
+        typecheck_fail(
+                "function foo : int () { if (false) {return true;} while (1==2){return 3;} return false; }"
+        );
+    }
 }

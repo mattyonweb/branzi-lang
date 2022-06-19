@@ -1,8 +1,11 @@
 package ASTnodes;
 
+import ASTnodes.ASTvisitors.ASTModifier;
+import ASTnodes.ASTvisitors.ASTVisitor;
+
 public class AssignVar extends ASTNode {
-    public final ASTNode varId;
-    public final ASTNode value;
+    public ASTNode varId;
+    public ASTNode value;
 
     public AssignVar(ASTNode varId, ASTNode value) {
         this.varId = varId;
@@ -39,4 +42,21 @@ public class AssignVar extends ASTNode {
         );
     }
 
+    @Override
+    public void astvisit(ASTVisitor visitor) {
+        visitor.visitAssignVar(this);
+    }
+
+    @Override
+    public ASTNode astmodify(ASTModifier visitor) {
+        return visitor.visitAssignVar(this);
+    }
+
+    public void setVarId(ASTNode varId) {
+        this.varId = varId;
+    }
+
+    public void setValue(ASTNode value) {
+        this.value = value;
+    }
 }

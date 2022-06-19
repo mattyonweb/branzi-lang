@@ -1,5 +1,8 @@
 package ASTnodes;
 
+import ASTnodes.ASTvisitors.ASTModifier;
+import ASTnodes.ASTvisitors.ASTVisitor;
+
 import java.util.List;
 
 public class Program extends ASTNode {
@@ -21,6 +24,16 @@ public class Program extends ASTNode {
         }
     }
 
+    @Override
+    public void astvisit(ASTVisitor visitor) {
+        visitor.visitProgram(this);
+    }
+
+    @Override
+    public ASTNode astmodify(ASTModifier visitor) {
+        return visitor.visitProgram(this);
+    }
+
     /////////////////////////////
 
     @Override
@@ -34,5 +47,9 @@ public class Program extends ASTNode {
 
     public List<ASTNode> getUnits() {
         return units;
+    }
+
+    public void setUnits(List<ASTNode> units) {
+        this.units = units;
     }
 }

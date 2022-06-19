@@ -1,11 +1,14 @@
 package ASTnodes;
 
+import ASTnodes.ASTvisitors.ASTModifier;
+import ASTnodes.ASTvisitors.ASTVisitor;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class MyArray extends ASTNode {
-    private ArrayList<ASTNode> list;
+    private List<ASTNode> list;
     private Type assignedType;
     private Type typeFromElements;
 
@@ -96,10 +99,28 @@ public class MyArray extends ASTNode {
         }
     }
 
+    @Override
+    public void astvisit(ASTVisitor visitor) {
+        visitor.visitMyArray(this);
+    }
+
+    @Override
+    public ASTNode astmodify(ASTModifier visitor) {
+        return visitor.visitMyArray(this);
+    }
+
     ////////////////////////////////
 
 
-    public ArrayList<ASTNode> getList() {
+    public void setList(List<ASTNode> list) {
+        this.list = list;
+    }
+
+    public void setTypeFromElements(Type typeFromElements) {
+        this.typeFromElements = typeFromElements;
+    }
+
+    public List<ASTNode> getList() {
         return list;
     }
 }

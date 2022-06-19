@@ -1,11 +1,14 @@
 package ASTnodes;
 
+import ASTnodes.ASTvisitors.ASTModifier;
+import ASTnodes.ASTvisitors.ASTVisitor;
+
 import java.util.HashMap;
 
 public class BinOp extends ASTNode {
-    private final ASTNode arg1;
-    private final String op;
-    private final ASTNode arg2;
+    private ASTNode arg1;
+    private String op;
+    private ASTNode arg2;
 
     private static final HashMap<String, Type> opTypes = new HashMap<>();
     static {
@@ -69,6 +72,16 @@ public class BinOp extends ASTNode {
         );
     }
 
+    @Override
+    public void astvisit(ASTVisitor visitor) {
+        visitor.visitBinOp(this);
+    }
+
+    @Override
+    public ASTNode astmodify(ASTModifier visitor) {
+        return visitor.visitBinOp(this);
+    }
+
     //////////////////////
 
     public ASTNode getArg1() {
@@ -81,5 +94,17 @@ public class BinOp extends ASTNode {
 
     public ASTNode getArg2() {
         return arg2;
+    }
+
+    public void setArg1(ASTNode arg1) {
+        this.arg1 = arg1;
+    }
+
+    public void setOp(String op) {
+        this.op = op;
+    }
+
+    public void setArg2(ASTNode arg2) {
+        this.arg2 = arg2;
     }
 }
