@@ -1,6 +1,7 @@
 package FrontEnd;
 
 import ASTnodes.*;
+import ASTnodes.ASTvisitors.OptimizerRemoveDeadCodeInFunction;
 import ASTnodes.ASTvisitors.VisitorFindReturnsWithin;
 import ASTnodes.Number;
 import generated.BranziBaseVisitor;
@@ -43,7 +44,7 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
         env.putAtOutermost(funcname, funcId);
 
         // Ottieni AST del body della funzione
-        ASTNode funcBody         = this.visit(ctx.block());
+        ASTNode funcBody         = this.visit(ctx.block()).astmodify(new OptimizerRemoveDeadCodeInFunction());
         List<Return> funcReturns = this.allReturnsInside(funcBody);
 
         env = env.outer();
@@ -99,7 +100,7 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
         functions.put(funcId, null);
 
         // Ottieni AST del body della funzione
-        ASTNode funcBody         = this.visit(ctx.block());
+        ASTNode funcBody         = this.visit(ctx.block()).astmodify(new OptimizerRemoveDeadCodeInFunction());
         List<Return> funcReturns = this.allReturnsInside(funcBody);
 
         env = env.outer();
@@ -210,24 +211,11 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
             return this.visit(statement.get(0));
         }
 
-//        ASTNode sequence = new NoOp();
-//        for (int i = statement.size()-1; i >= 0; i--) {
-//            sequence = new Sequence(this.visit(statement.get(i)), sequence);
-//        }
-//        System.out.println(sequence);
-//        return sequence;
-
-
-        ASTNode fstNode = this.visit(statement.get(0));
-        ASTNode sndNode = this.visit(statement.get(1));
-        ASTNode sequence = new Sequence(fstNode, sndNode);
-        for (BranziParser.StatementContext sc : statement.subList(2, statement.size())) {
-            ASTNode newNode = this.visit(sc);
-            sequence = new Sequence(sequence, newNode);
-        }
-
-        System.out.println(sequence);
-        return sequence;
+        return new Sequence(statement
+                .stream()
+                .map(this::visit)
+                .collect(Collectors.toList())
+        );
     }
 
 
@@ -281,15 +269,20 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
             return this.visit(statement.get(0));
         }
 
-        ASTNode fstNode = this.visit(statement.get(0));
-        ASTNode sndNode = this.visit(statement.get(1));
-        ASTNode sequence = new Sequence(fstNode, sndNode);
-        for (BranziParser.Statement_brk_cntContext sc : statement.subList(2, statement.size())) {
-            ASTNode newNode = this.visit(sc);
-            sequence = new Sequence(sequence, newNode);
-        }
-
-        return sequence;
+        return new Sequence(statement
+                .stream()
+                .map(this::visit)
+                .collect(Collectors.toList())
+        );
+//        ASTNode fstNode = this.visit(statement.get(0));
+//        ASTNode sndNode = this.visit(statement.get(1));
+//        ASTNode sequence = new Sequence(fstNode, sndNode);
+//        for (BranziParser.Statement_brk_cntContext sc : statement.subList(2, statement.size())) {
+//            ASTNode newNode = this.visit(sc);
+//            sequence = new Sequence(sequence, newNode);
+//        }
+//
+//        return sequence;
 
 //        ASTNode sequence = new NoOp();
 //        // Right recursive

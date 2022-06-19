@@ -21,6 +21,6 @@ public class NoOp extends ASTNode {
 
     @Override
     public ASTNode astmodify(ASTModifier visitor) {
-        return null;
+        return visitor.visitNoOp(this);
     }
 }

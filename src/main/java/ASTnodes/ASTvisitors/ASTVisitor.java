@@ -66,9 +66,7 @@ public class ASTVisitor {
     }
 
     public void visitSequence(Sequence s) {
-        s.getN1().astvisit(this);
-        s.getN2().astvisit(this);
-
+        s.getNodes().forEach(x -> x.astvisit(this));
     }
 
     public void visitType(Type t) {

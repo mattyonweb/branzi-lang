@@ -11,10 +11,11 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class Utils {
     static FrontEnd frontEnd = new FrontEnd();
 
-    static void typechecks(String s) throws IOException, TypeCheckerFail {
+    public static ASTNode typechecks(String s) throws IOException, TypeCheckerFail {
         ASTNode node = frontEnd.ast_of_string(s);
         System.out.println(node);
         node.typecheck();
+        return node;
     }
 
     static void typecheck_fail(String s) {

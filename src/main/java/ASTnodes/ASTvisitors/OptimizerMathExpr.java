@@ -5,7 +5,7 @@ import ASTnodes.Number;
 
 import java.util.List;
 
-public class VisitSimplifyMathExpr extends ASTModifier {
+public class OptimizerMathExpr extends ASTModifier {
     List<String> canSimplify = List.of("+", "-", "*", "/");
     List<String> canSimplifyBool = List.of("and", "or", "xor");
     List<String> canSimplifyComparison = List.of("==", "!=");

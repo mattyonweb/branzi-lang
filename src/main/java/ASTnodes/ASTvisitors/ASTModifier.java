@@ -55,7 +55,12 @@ public class ASTModifier {
         return ma;
     }
 
+    public ASTNode visitNoOp(NoOp no) {
+        return no;
+    }
+
     public ASTNode visitNumber(Number n) { return n; }
+
 
     public ASTNode visitProgram(Program p) {
         p.setUnits(p.getUnits().stream().map(x -> x.astmodify(this)).collect(Collectors.toList()));
@@ -63,12 +68,14 @@ public class ASTModifier {
     }
 
     public ASTNode visitReturn(Return r) {
+        r.setExpr(r.getExpr().astmodify(this));
         return r;
     }
 
     public ASTNode visitSequence(Sequence s) {
-        s.setN1(s.getN1().astmodify(this));
-        s.setN2(s.getN2().astmodify(this));
+        s.setNodes(
+                s.getNodes().stream().map(x -> x.astmodify(this)).collect(Collectors.toList())
+        );
         return s;
     }
 

@@ -40,4 +40,8 @@ public class Return extends ASTNode {
     public ASTNode getExpr() {
         return expr;
     }
+
+    public void setExpr(ASTNode expr) {
+        this.expr = expr;
+    }
 }
