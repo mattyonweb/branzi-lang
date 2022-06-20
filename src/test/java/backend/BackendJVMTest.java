@@ -7,104 +7,105 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class BackendJVMTest {
+    ExecuteBytecode bytecodeExecuter;
+    final String classpath = "/home/groucho/IdeaProjects/SimpleLanguage/src/test/java/backend/output";
 
     @BeforeEach
     void setUp() {
+        bytecodeExecuter = new ExecuteBytecode(classpath);
     }
 
-    @AfterEach
-    void tearDown() {
+    private static String getMethodName() {
+        // Returns the name of the method that is currently executing (!)
+        return (Thread.currentThread().getStackTrace()[2].getMethodName());
     }
+
+    public void compile(String program, String className) throws IOException {
+        // Obtain AST
+        ASTNode root       = new FrontEnd().getOptimizedAST(program);
+
+        // Compile to Bytecode and write to file
+        BackendJVM backend = new BackendJVM(className, Path.of(this.classpath));
+        backend.writeToFile(root);
+    }
+
+    void test(String classname, List<String> expected) throws IOException, InterruptedException {
+        // Matches the output of the executed .class file with the expected
+        List<String> actual = bytecodeExecuter.run(classname);
+        assertLinesMatch(expected, actual);
+    }
+
+
+
+    ////////////////////////////////////////
 
     @Test
-    void serializeToBytes() throws IOException {
-        ASTNode root = new FrontEnd().getOptimizedAST(
-                "{x: int := 100; y: int := x-1; z: int := 2*y-x*(3+1) / 7; print(z); }"
+    void TestSimpleConditionals() throws IOException, InterruptedException {
+        compile(
+                "function main : list string -> void (ss) {" +
+                        "{x: int := 44; y: int := 66; if (y < x) {print(444);} print(666); }",
+                getMethodName()
         );
 
-        BackendJVM prova = new BackendJVM(
-                "Prova",
-                Path.of("/home/groucho/IdeaProjects/SimpleLanguage/src/test/java/backend/output")
-        );
-
-        prova.writeToFile(root);
+        test(getMethodName(), List.of("666"));
     }
 
+
     @Test
-    void serializeToBytes2() throws IOException {
-        ASTNode root = new FrontEnd().getOptimizedAST(
-                "{x: int := 44; y: int := 66; if (y < x) {print(444);} print(666); }"
+    void TestWhileAndPrint() throws IOException, InterruptedException {
+        compile("function main : list string -> void (ss) {" +
+                "{x: int := 0; while (x < 10) {x = x + 1; print(x);} print(x);}",
+                getMethodName()
         );
 
-        BackendJVM prova = new BackendJVM(
-                "Prova",
-                Path.of("/home/groucho/IdeaProjects/SimpleLanguage/src/test/java/backend/output")
-        );
+        List<String> expected = new ArrayList<>();
+        for (int i = 1; i <= 10; i++) {
+            expected.add(String.valueOf(i));
+        } expected.add("10");
 
-        prova.writeToFile(root);
+        test(getMethodName(), expected);
     }
 
+
     @Test
-    void serializeToBytes3() throws IOException {
-        ASTNode root = new FrontEnd().getOptimizedAST(
-                "{x: int := 0; while (x < 10) {x = x + 1; print(x);} print(x);}"
+    void TestComplexConditionWhile() throws IOException, InterruptedException {
+        compile("function main : list string -> void (ss) {" +
+                "x: int := 1; while (x < 10 and x+6 <= 10) {x = x + 3; print(x);} print(x);}",
+                getMethodName()
         );
 
-        BackendJVM prova = new BackendJVM(
-                "Prova",
-                Path.of("/home/groucho/IdeaProjects/SimpleLanguage/src/test/java/backend/output")
-        );
-
-        prova.writeToFile(root);
+        test(getMethodName(), List.of("4", "7", "7"));
     }
 
+
     @Test
-    void serializeToBytes4() throws IOException {
-        ASTNode root = new FrontEnd().getOptimizedAST(
-                "{x: int := 1; while (x < 10 and x+5 <= 10) {x = x + 3; print(x);} print(x);}"
-        );
+    void TestMultipleFunctions2() throws IOException, InterruptedException {
+        compile("function foo : (int -> bool -> int) (x, b) { if (b) {return x;} return 665+1;}" +
+                                "function main : (list string -> void) (ss) { print(foo(10, false)); return;}",
+                        getMethodName());
 
-        BackendJVM prova = new BackendJVM(
-                "Prova",
-                Path.of("/home/groucho/IdeaProjects/SimpleLanguage/src/test/java/backend/output")
-        );
-
-        prova.writeToFile(root);
+        test(getMethodName(), List.of("666"));
     }
 
-    @Test
-    void serializeToBytes5() throws IOException {
-        ASTNode root = new FrontEnd().getOptimizedAST(
-                "function foo : (int -> bool -> int) (x, b) { return x; }" +
-                        "function main : (list string -> void) (ss) { foo(10, true); return;}"
-        );
-
-        BackendJVM prova = new BackendJVM(
-                "Prova",
-                Path.of("/home/groucho/IdeaProjects/SimpleLanguage/src/test/java/backend/output")
-        );
-
-        prova.writeToFile(root);
-    }
 
     @Test
-    void serializeToBytes6() throws IOException {
-        ASTNode root = new FrontEnd().getOptimizedAST(
-                "function foo : (int -> bool -> int) (x, b) { if (b) {return x;} return 665+1;}" +
-                        "function main : (list string -> void) (ss) { print(foo(10, true)); return;}"
-        );
+    void TestFactorial() throws IOException, InterruptedException {
+        compile("function fact : (int -> int) (n) { if ( n <= 1) {return 1;} return n * fact(n-1);}" +
+                        "function main : (list string -> void) (ss) { print(fact(10)); return;}",
+                getMethodName());
 
-        BackendJVM prova = new BackendJVM(
-                "Prova",
-                Path.of("/home/groucho/IdeaProjects/SimpleLanguage/src/test/java/backend/output")
-        );
-
-        prova.writeToFile(root);
+        test(getMethodName(), List.of("3628800"));
     }
 }

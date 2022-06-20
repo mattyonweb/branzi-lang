@@ -52,7 +52,7 @@ public class Operation extends IRInstruction {
             LabelIR lbl_after = new LabelIR(new Label());
 
             List<IRInstruction> instrs = List.of(
-                    new If2(oper, lbl_else),
+                    new If2(If.negate(oper), lbl_else),
                     new Push(new Number(1), Type.INT, "c"),
                     new Jump(lbl_after),
                     lbl_else,

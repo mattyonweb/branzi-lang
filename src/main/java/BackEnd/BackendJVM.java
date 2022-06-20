@@ -50,7 +50,6 @@ public class BackendJVM {
                 this.addMethod(func, funcdefs);
         }
 
-//        this.addMainMethod(root, funcdefs);
         this.cw.visitEnd();
 
         FileOutputStream fos = new FileOutputStream(String.valueOf(this.filename));
