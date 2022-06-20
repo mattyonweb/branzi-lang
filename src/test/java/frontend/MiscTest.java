@@ -28,4 +28,13 @@ public class MiscTest {
                 "{ b: bool := true and ((4+7) == 10); }"
         );
     }
+
+    @Test
+    public void printTest() throws IOException {
+        typechecks("{ print(10); }");
+        typechecks("{ print(3*(45-15)+1); }");
+        typechecks("{ print(true or (false and true)); }");
+        typechecks("{ x: int := 0; print(1+x); }");
+        typechecks("{ l: list bool := [true, false]; print(l); }");
+    }
 }

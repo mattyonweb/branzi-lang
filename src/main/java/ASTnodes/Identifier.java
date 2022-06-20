@@ -10,6 +10,10 @@ public class Identifier extends ASTNode {
     public Identifier(String id) {
         this.id = id;
     }
+    public Identifier(String id, Type type) {
+        this.id = id;
+        this.type = type;
+    }
 
     public void setType(Type type) {
         this.type = type;

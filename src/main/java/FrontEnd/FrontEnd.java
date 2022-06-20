@@ -2,6 +2,7 @@ package FrontEnd;
 
 import ASTnodes.ASTNode;
 import ASTnodes.ASTvisitors.ASTModifier;
+import ASTnodes.ASTvisitors.Monomorphization;
 import ASTnodes.ASTvisitors.OptimizerMathExpr;
 import ASTnodes.ASTvisitors.OptimizerRemoveDeadCodeInFunction;
 import ASTnodes.TypeCheckerFail;
@@ -32,7 +33,10 @@ public class FrontEnd {
 
     public ASTNode getOptimizedAST(String s) throws IOException {
         return getAST(
-                s, List.of(new OptimizerMathExpr(), new OptimizerRemoveDeadCodeInFunction())
+                s, List.of(
+                        new OptimizerMathExpr(), new OptimizerRemoveDeadCodeInFunction(),
+                        new Monomorphization()
+                )
         );
     }
 

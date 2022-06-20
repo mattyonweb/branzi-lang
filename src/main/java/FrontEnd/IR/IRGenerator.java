@@ -61,6 +61,13 @@ public class IRGenerator extends ASTVisitor {
 
     @Override
     public void visitFuncall(Funcall c) {
+        if (c.getFuncId().getId().equals("print")) {
+            this.instructions.add(new JVMInstruction(
+                    JVMInstruction.typeJvmInstr.GETSTATIC,
+                    "java/lang/System", "out", "Ljava/io/PrintStream;")
+            );
+        }
+
         c.getArgs().forEach(x -> x.astvisit(this));
 
         instructions.add(new Call(c.getFuncId()));

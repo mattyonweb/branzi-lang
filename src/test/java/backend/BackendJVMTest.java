@@ -25,7 +25,7 @@ class BackendJVMTest {
     @Test
     void serializeToBytes() throws IOException {
         ASTNode root = new FrontEnd().getOptimizedAST(
-                "{x: int := 100; y: int := x-1; z: int := 2*y-x*(3+1) / 7; }"
+                "{x: int := 100; y: int := x-1; z: int := 2*y-x*(3+1) / 7; print(z); }"
         );
 
         BackendJVM prova = new BackendJVM(

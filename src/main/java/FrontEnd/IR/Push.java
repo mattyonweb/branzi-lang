@@ -34,8 +34,20 @@ public class Push extends IRInstruction {
     public void compile(VarTable vt, MethodVisitor mv) {
         if (this.loadtype.equals(CONSTANT)) {
 
-            if (x instanceof Number)
-                mv.visitLdcInsn(((Number) x).getN());
+            if (x instanceof Number) {
+                Integer n = ((Number) x).getN();
+                if (n==0) mv.visitInsn(ICONST_0);
+                else if (n==1) mv.visitInsn(ICONST_1);
+                else if (n==2) mv.visitInsn(ICONST_2);
+                else if (n==3) mv.visitInsn(ICONST_3);
+                else if (n==4) mv.visitInsn(ICONST_4);
+                else if (n==5) mv.visitInsn(ICONST_5);
+                else if (n==-1) mv.visitInsn(ICONST_M1);
+//                else if (Math.abs(n) <= 127) mv.visitIntInsn(BIPUSH, n);
+                else if (Math.abs(n) < 65535) mv.visitIntInsn(SIPUSH, n);
+                else mv.visitLdcInsn(((Number) x).getN());
+
+            }
 
             else if (x instanceof Bool) {
                 if (((Bool) x).getB())
@@ -46,7 +58,7 @@ public class Push extends IRInstruction {
         }
 
         // TODO: e se è una lista? Se è un acccesso ad array?
-        if (this.loadtype.equals(VAR)) {
+        else if (this.loadtype.equals(VAR)) {
             Identifier id = (Identifier) this.x;
             mv.visitVarInsn(ILOAD, vt.get(id));
         }

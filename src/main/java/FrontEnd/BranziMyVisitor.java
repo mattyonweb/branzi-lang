@@ -22,6 +22,10 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitProgram(BranziParser.ProgramContext ctx) {
+        Identifier printId = new Identifier("print", Type.Function(Type.ANY, Type.VOID));
+        env.putAtOutermost("print", printId);
+        functions.put(printId, null); // TODO: Risky...
+
         return new Program(
                 ctx.unit().stream().map(this::visit).collect(Collectors.toList())
         );
