@@ -79,4 +79,9 @@ public class OptimizerMathExpr extends ASTModifier {
         }
         return null;
     }
+
+    @Override
+    public String toString() {
+        return "OptimizerMathExpr{}";
+    }
 }

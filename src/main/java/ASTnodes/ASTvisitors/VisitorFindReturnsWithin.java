@@ -17,4 +17,9 @@ public class VisitorFindReturnsWithin extends ASTVisitor{
     public List<Return> getFound() {
         return found;
     }
+
+    @Override
+    public String toString() {
+        return "VisitorFindReturnsWithin{}";
+    }
 }

@@ -57,4 +57,9 @@ public class OptimizerRemoveDeadCodeInFunction extends ASTModifier {
         }
         return s;
     }
+
+    @Override
+    public String toString() {
+        return "OptimizerRemoveDeadCodeInFunction{}";
+    }
 }

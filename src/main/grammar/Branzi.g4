@@ -112,6 +112,7 @@ MINUS : '-';
 T_INT : 'int';
 T_BOOL : 'bool';
 T_LIST : 'list';
+T_STR : 'string'; // TODO
 T_ANY  : 'any';
 T_VOID  : 'void';
 
@@ -122,7 +123,7 @@ type
 
 simple_type
     : '(' simple_type ')'   # parensType
-    | basetype=(T_INT|T_BOOL|T_ANY|T_VOID)  # baseType
+    | basetype=(T_INT|T_BOOL|T_ANY|T_VOID|T_STR)  # baseType
     | T_LIST simple_type    # arrayType
     ;
 

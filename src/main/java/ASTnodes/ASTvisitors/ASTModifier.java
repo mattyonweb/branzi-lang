@@ -94,4 +94,9 @@ public class ASTModifier {
         w.setBlock(w.getBlock().astmodify(this));
         return w;
     }
+
+    @Override
+    public String toString() {
+        return "ASTModifier{}";
+    }
 }

@@ -10,6 +10,7 @@ public class Type extends ASTNode {
     public static Type INT = new Type("int");
     public static Type BOOL = new Type("bool");
     public static Type VOID = new Type("void");
+    public static Type STRING = new Type("string"); // TODO
     public static Type ANY = new Type("any");
     public static Type TYPE = new Type("type");
     public static Type TBD = new Type("tbd");
@@ -60,6 +61,7 @@ public class Type extends ASTNode {
         return this.parameters.size() > 0;
     }
     public boolean isFunction() { return this.typeName.equals("function"); }
+    public boolean isList() {return this.typeName.equals("list"); }
     //////////////////////////////////
 
     public static Type mostGeneralType(List<Type> types) {

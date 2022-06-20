@@ -34,7 +34,7 @@ public class FrontEnd {
     public ASTNode getOptimizedAST(String s) throws IOException {
         return getAST(
                 s, List.of(
-                        new OptimizerMathExpr(), new OptimizerRemoveDeadCodeInFunction(),
+                        new OptimizerMathExpr(), // new OptimizerRemoveDeadCodeInFunction(),
                         new Monomorphization()
                 )
         );
@@ -45,7 +45,9 @@ public class FrontEnd {
 
         ast.typecheck();
 
+
         for (ASTModifier visitor: optimizations) {
+            System.out.println(visitor);
             ast = ast.astmodify(visitor);
         }
 

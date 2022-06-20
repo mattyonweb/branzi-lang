@@ -21,4 +21,9 @@ public class VisitorFindIllegalReturn extends ASTVisitor {
         }
         super.visitReturn(r);
     }
+
+    @Override
+    public String toString() {
+        return "VisitorFindIllegalReturn{}";
+    }
 }

@@ -17,7 +17,6 @@ public class ifFalse extends If {
 
     @Override
     public void compile(VarTable vt, MethodVisitor mv) {
-//        mv.visitInsn(ICONST_0); // load FALSE
-        mv.visitJumpInsn(IFNE, goTo.getASMLabel()); // Jump iff pop() == FALSE
+        mv.visitJumpInsn(IFEQ, goTo.getASMLabel()); // Jump iff pop() == FALSE
     }
 }

@@ -278,24 +278,6 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
                 .map(this::visit)
                 .collect(Collectors.toList())
         );
-//        ASTNode fstNode = this.visit(statement.get(0));
-//        ASTNode sndNode = this.visit(statement.get(1));
-//        ASTNode sequence = new Sequence(fstNode, sndNode);
-//        for (BranziParser.Statement_brk_cntContext sc : statement.subList(2, statement.size())) {
-//            ASTNode newNode = this.visit(sc);
-//            sequence = new Sequence(sequence, newNode);
-//        }
-//
-//        return sequence;
-
-//        ASTNode sequence = new NoOp();
-//        // Right recursive
-//        for (int i = statement.size()-1; i >= 0; i--) {
-//            sequence = new Sequence(this.visit(statement.get(i)), sequence);
-//        }
-//
-//        System.out.println(sequence);
-//        return sequence;
     }
 
     @Override
@@ -463,6 +445,7 @@ public class BranziMyVisitor extends BranziBaseVisitor<ASTNode> {
             case "int": return Type.INT;
             case "any": return Type.ANY;
             case "bool": return Type.BOOL;
+            case "string": return Type.STRING;
             case "void": return Type.VOID;
             default: return null;
         }

@@ -17,7 +17,6 @@ public class IfTrue extends If {
 
     @Override
     public void compile(VarTable vt, MethodVisitor mv) {
-//        mv.visitInsn(ICONST_1); // load TRUE
-        mv.visitJumpInsn(IFEQ, goTo.getASMLabel());
+        mv.visitJumpInsn(IFNE, goTo.getASMLabel());
     }
 }

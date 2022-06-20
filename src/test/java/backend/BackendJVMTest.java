@@ -77,4 +77,34 @@ class BackendJVMTest {
 
         prova.writeToFile(root);
     }
+
+    @Test
+    void serializeToBytes5() throws IOException {
+        ASTNode root = new FrontEnd().getOptimizedAST(
+                "function foo : (int -> bool -> int) (x, b) { return x; }" +
+                        "function main : (list string -> void) (ss) { foo(10, true); return;}"
+        );
+
+        BackendJVM prova = new BackendJVM(
+                "Prova",
+                Path.of("/home/groucho/IdeaProjects/SimpleLanguage/src/test/java/backend/output")
+        );
+
+        prova.writeToFile(root);
+    }
+
+    @Test
+    void serializeToBytes6() throws IOException {
+        ASTNode root = new FrontEnd().getOptimizedAST(
+                "function foo : (int -> bool -> int) (x, b) { if (b) {return x;} return 665+1;}" +
+                        "function main : (list string -> void) (ss) { print(foo(10, true)); return;}"
+        );
+
+        BackendJVM prova = new BackendJVM(
+                "Prova",
+                Path.of("/home/groucho/IdeaProjects/SimpleLanguage/src/test/java/backend/output")
+        );
+
+        prova.writeToFile(root);
+    }
 }

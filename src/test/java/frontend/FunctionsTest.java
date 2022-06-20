@@ -230,4 +230,11 @@ class FunctionsTest {
                 "function foo : int () { if (false) {return true;} while (1==2){return 3;} return false; }"
         );
     }
+
+    @Test
+    void testFuncReturnVoid() throws IOException, TypeCheckerFail {
+        new FrontEnd().getOptimizedAST(
+                "function foo : (int -> bool -> int) (x, b) { return x; }" +
+                        "function main : (list string -> void) (ss) { foo(10, true); return;}");
+    }
 }
