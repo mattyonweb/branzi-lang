@@ -35,6 +35,14 @@ public class IRGenerator extends ASTVisitor {
     }
 
     @Override
+    public void visitUpdateVar(UpdateVar uv) {
+        uv.getValue().astvisit(this);
+        instructions.add(
+                new Store(uv.getVarId(), uv.getValue().typeof()) // TODO: typeof giusto?
+        );
+    }
+
+    @Override
     public void visitBinOp(BinOp bo) {
         super.visitBinOp(bo);
         instructions.add(
@@ -54,9 +62,22 @@ public class IRGenerator extends ASTVisitor {
         LabelIR label = new LabelIR(new Label());
 
         i.getCondition().astvisit(this);
-        instructions.add(new IfTrue(label));
+        instructions.add(new ifFalse(label));
         i.getCode().astvisit(this);
         instructions.add(label);
+    }
+
+    @Override
+    public void visitWhile(While w) {
+        LabelIR labelStart    = new LabelIR(new Label());
+        LabelIR labelAfterEnd = new LabelIR(new Label());
+
+        this.instructions.add(labelStart);
+        w.getCondition().astvisit(this);
+        instructions.add(new ifFalse(labelAfterEnd));
+        w.getBlock().astvisit(this);
+        instructions.add(new Jump(labelStart));
+        instructions.add(labelAfterEnd);
     }
 
     @Override

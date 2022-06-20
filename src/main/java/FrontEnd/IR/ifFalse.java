@@ -5,19 +5,19 @@ import org.objectweb.asm.MethodVisitor;
 
 import static org.objectweb.asm.Opcodes.*;
 
-public class IfTrue extends If {
-    public IfTrue(LabelIR goTo) {
+public class ifFalse extends If {
+    public ifFalse(LabelIR goTo) {
         super(goTo);
     }
 
     @Override
     public String toString() {
-        return "IfTrue {goto: " + this.goTo + "}";
+        return "IfFalse {goto: " + this.goTo + "}";
     }
 
     @Override
     public void compile(VarTable vt, MethodVisitor mv) {
-//        mv.visitInsn(ICONST_1); // load TRUE
-        mv.visitJumpInsn(IFEQ, goTo.getASMLabel());
+//        mv.visitInsn(ICONST_0); // load FALSE
+        mv.visitJumpInsn(IFNE, goTo.getASMLabel()); // Jump iff pop() == FALSE
     }
 }

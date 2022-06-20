@@ -26,7 +26,7 @@ public class BackendJVM {
 
 
     public BackendJVM(String className, Path directory) {
-        cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+        cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
         cw.visit(
                 V1_8, ACC_PUBLIC + ACC_SUPER, className,
                 null, "java/lang/Object", null

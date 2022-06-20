@@ -43,7 +43,7 @@ public class Push extends IRInstruction {
                 else if (n==4) mv.visitInsn(ICONST_4);
                 else if (n==5) mv.visitInsn(ICONST_5);
                 else if (n==-1) mv.visitInsn(ICONST_M1);
-//                else if (Math.abs(n) <= 127) mv.visitIntInsn(BIPUSH, n);
+                else if (Math.abs(n) <= 127) mv.visitIntInsn(BIPUSH, n);
                 else if (Math.abs(n) < 65535) mv.visitIntInsn(SIPUSH, n);
                 else mv.visitLdcInsn(((Number) x).getN());
 

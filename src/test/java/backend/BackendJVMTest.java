@@ -35,4 +35,46 @@ class BackendJVMTest {
 
         prova.writeToFile(root);
     }
+
+    @Test
+    void serializeToBytes2() throws IOException {
+        ASTNode root = new FrontEnd().getOptimizedAST(
+                "{x: int := 44; y: int := 66; if (y < x) {print(444);} print(666); }"
+        );
+
+        BackendJVM prova = new BackendJVM(
+                "Prova",
+                Path.of("/home/groucho/IdeaProjects/SimpleLanguage/src/test/java/backend/output")
+        );
+
+        prova.writeToFile(root);
+    }
+
+    @Test
+    void serializeToBytes3() throws IOException {
+        ASTNode root = new FrontEnd().getOptimizedAST(
+                "{x: int := 0; while (x < 10) {x = x + 1; print(x);} print(x);}"
+        );
+
+        BackendJVM prova = new BackendJVM(
+                "Prova",
+                Path.of("/home/groucho/IdeaProjects/SimpleLanguage/src/test/java/backend/output")
+        );
+
+        prova.writeToFile(root);
+    }
+
+    @Test
+    void serializeToBytes4() throws IOException {
+        ASTNode root = new FrontEnd().getOptimizedAST(
+                "{x: int := 1; while (x < 10 and x+5 <= 10) {x = x + 3; print(x);} print(x);}"
+        );
+
+        BackendJVM prova = new BackendJVM(
+                "Prova",
+                Path.of("/home/groucho/IdeaProjects/SimpleLanguage/src/test/java/backend/output")
+        );
+
+        prova.writeToFile(root);
+    }
 }
